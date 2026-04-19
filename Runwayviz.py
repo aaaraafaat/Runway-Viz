@@ -18,7 +18,7 @@ CROSSWIND_LIMIT_KNOTS = 12
 VISIBILITY_LIMIT_MILES = 5
 
 
-ddef fetch_metar_with_retry(icao, retries=2):
+def fetch_metar_with_retry(icao, retries=2):
     # Try CheckWX first (more reliable for BD airports)
     api_key = os.environ.get("CHECKWX_API_KEY")
     if api_key:
