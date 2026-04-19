@@ -1,0 +1,26 @@
+[
+    {
+      "name": "Cessna 152",
+      "max_crosswind": 12,
+      "max_headwind": 20,
+      "max_tailwind": 10,
+      "min_visibility": 3,
+      "avoid_thunderstorm": true
+    },
+    {
+      "name": "Cessna 172",
+      "max_crosswind": 15,
+      "max_headwind": 25,
+      "max_tailwind": 12,
+      "min_visibility": 3,
+      "avoid_thunderstorm": true
+    },
+    {
+      "name": "Piper Seneca",
+      "max_crosswind": 20,
+      "max_headwind": 30,
+      "max_tailwind": 15,
+      "min_visibility": 2,
+      "avoid_thunderstorm": false
+    }
+  ]
