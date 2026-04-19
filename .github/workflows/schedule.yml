@@ -24,8 +24,7 @@ jobs:
         run: python Runwayviz.py
       
       - name: Send email report
-        if: always()  # Send even if script had warnings
-        run: python send_alert.py
+        run: python sendalert.py
         env:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
