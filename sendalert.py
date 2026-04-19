@@ -43,5 +43,5 @@ if __name__ == "__main__":
         sys.exit(1)
     
     # Replace with your email address(es)
-    recipients = ["your_email@gmail.com"]
+    recipients = ["aaa.r.aa.f.aa.t@gmail.com"]
     send_email_alert(report, recipients)
