@@ -6,7 +6,6 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from sources.noaa import NOAAFetcher
-from sources.baf_ocr import BAFOCRfetcher
 from sources.checkwx import CheckWXFetcher
 import config
 
@@ -42,12 +41,13 @@ def generate_report():
         lines.append(f"   Wind: {wind_str} | Vis: {weather['visibility']} mi")
         if weather.get('has_thunderstorm'):
             lines.append("   ⛈️ Thunderstorm reported")
-        if weather.get('raw_metar'):
-            lines.append(f"   Raw: {weather['raw_metar'][:100]}...")
         if weather.get('temperature') is not None:
-            lines.append(f"   Temp: {weather['temperature']}°C / Dew: {weather.get('dewpoint', '?')}°C")
+            lines.append(f"   Temp: {weather['temperature']}°C | Dew: {weather.get('dewpoint', '?')}°C")
         if weather.get('qnh_hpa'):
             lines.append(f"   QNH: {weather['qnh_hpa']} hPa")
+        if weather.get('raw_metar'):
+            lines.append(f"   Raw: {weather['raw_metar'][:100]}...")
+    
     return "\n".join(lines)
 
 if __name__ == "__main__":

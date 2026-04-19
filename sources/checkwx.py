@@ -29,15 +29,23 @@ class CheckWXFetcher(WeatherFetcher):
         return {'success': False, 'source': 'CheckWX', 'error': 'No data'}
 
     def _parse_metar(self, metar):
+        import re
         wind_match = re.search(r'(\d{3})(\d{2})KT', metar)
         wind_dir = int(wind_match.group(1)) if wind_match else None
         wind_speed = int(wind_match.group(2)) if wind_match else 0
         vis_match = re.search(r'(\d{4}) ', metar)
-        if vis_match:
-            vis_miles = int(vis_match.group(1)) / 1609.34
-        else:
-            vis_miles = 10
+        vis_miles = int(vis_match.group(1)) / 1609.34 if vis_match else 10
         has_ts = 'TS' in metar or 'TSRA' in metar
+        # Temperature and dewpoint: e.g., "28/25"
+        temp_match = re.search(r'(\d{2})/(\d{2})', metar)
+        temp = int(temp_match.group(1)) if temp_match else None
+        dewpoint = int(temp_match.group(2)) if temp_match else None
+        # QNH (altimeter setting): e.g., "Q1005" or "A2992"
+        qnh_match = re.search(r'Q(\d{4})', metar)
+        if qnh_match:
+            qnh_hpa = int(qnh_match.group(1))
+        else:
+            qnh_hpa = None
         alerts = []
         if wind_speed > config.CROSSWIND_LIMIT_KNOTS:
             alerts.append(f"CROSSWIND ALERT: {wind_speed} kts (limit {config.CROSSWIND_LIMIT_KNOTS})")
@@ -48,5 +56,8 @@ class CheckWXFetcher(WeatherFetcher):
             'wind_dir': wind_dir,
             'visibility': round(vis_miles, 1),
             'has_thunderstorm': has_ts,
-            'alerts': alerts
+            'alerts': alerts,
+            'temperature': temp,
+            'dewpoint': dewpoint,
+            'qnh_hpa': qnh_hpa
         }
