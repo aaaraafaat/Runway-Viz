@@ -1,0 +1,26 @@
+name: Run Weather Monitor
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs at minute 0 of every hour
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install metar requests pandas
+      - name: Run weather monitor
+        run: python weather_monitor.py
+      - name: Commit report
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add latest_report.txt
+          git commit -m "Auto-update report $(date +'%Y-%m-%d %H:%M')" || exit 0
+          git push
