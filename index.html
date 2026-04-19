@@ -12,26 +12,10 @@
             padding: 20px;
             transition: 0.2s;
         }
-        /* Dark theme (default) */
-        body.dark {
-            background: #0a0f1e;
-            color: #e2e8f0;
-        }
-        body.light {
-            background: #f0f2f5;
-            color: #1e293b;
-        }
-        /* Theme-specific card styles */
-        body.dark .card {
-            background: #1e293b;
-            border: 1px solid #334155;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-        body.light .card {
-            background: white;
-            border: 1px solid #cbd5e1;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+        body.dark { background: #0a0f1e; color: #e2e8f0; }
+        body.light { background: #f0f2f5; color: #1e293b; }
+        body.dark .card { background: #1e293b; border: 1px solid #334155; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+        body.light .card { background: white; border: 1px solid #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         body.dark .airfield { background: #0f172a; }
         body.light .airfield { background: #f9fafb; }
         body.dark .aircraft-item { background: #0f172a; }
@@ -44,109 +28,34 @@
         body.light .runway-svg { background: #e2e8f0; }
         body.dark input, body.dark select { background: #0f172a; border-color: #334155; color: #e2e8f0; }
         body.light input, body.light select { background: white; border-color: #cbd5e1; color: #1e293b; }
-        /* Shared styles */
-        .dashboard {
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
+        .dashboard { display: flex; gap: 24px; flex-wrap: wrap; }
         .left-panel { flex: 2; min-width: 320px; }
         .right-panel { flex: 1.2; min-width: 280px; }
-        .card {
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-        .card h3 {
-            margin-top: 0;
-            color: #facc15;
-            border-left: 4px solid #facc15;
-            padding-left: 12px;
-        }
-        .airfield {
-            border-left: 4px solid #475569;
-            margin-bottom: 16px;
-            padding: 16px;
-            border-radius: 16px;
-        }
+        .card { border-radius: 20px; padding: 20px; margin-bottom: 24px; }
+        .card h3 { margin-top: 0; color: #facc15; border-left: 4px solid #facc15; padding-left: 12px; }
+        .airfield { border-left: 4px solid #475569; margin-bottom: 16px; padding: 16px; border-radius: 16px; }
         .airfield.unsafe { border-left-color: #ef4444; }
         .airfield.safe { border-left-color: #22c55e; }
-        .airfield-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .icao-code {
-            font-weight: bold;
-            font-size: 1.4rem;
-            color: #facc15;
-        }
-        .wind-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0,0,0,0.2);
-            padding: 4px 12px;
-            border-radius: 40px;
-        }
+        .airfield-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .icao-code { font-weight: bold; font-size: 1.4rem; color: #facc15; }
+        .wind-indicator { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.2); padding: 4px 12px; border-radius: 40px; }
         .windsock { font-size: 1.2rem; }
         .windsock.green { color: #22c55e; }
         .windsock.yellow { color: #eab308; }
         .windsock.red { color: #ef4444; }
-        .badge {
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: 20px;
-            background: #334155;
-        }
+        .badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 20px; background: #334155; }
         .badge.ts { background: #b91c1c; color: white; }
-        button {
-            background: #3b82f6;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        button { background: #3b82f6; border: none; padding: 6px 12px; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; }
         button:hover { background: #2563eb; }
         button.danger { background: #dc2626; }
         button.danger:hover { background: #b91c1c; }
-        .add-form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-        }
+        .add-form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
         .add-form input { flex: 1; min-width: 70px; padding: 8px; border-radius: 8px; }
         hr { margin: 16px 0; }
-        .runway-svg {
-            border-radius: 16px;
-            padding: 12px;
-            text-align: center;
-            margin-bottom: 16px;
-        }
-        .airfield-actions {
-            margin-top: 10px;
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
+        .runway-svg { border-radius: 16px; padding: 12px; text-align: center; margin-bottom: 16px; }
+        .airfield-actions { margin-top: 10px; display: flex; gap: 8px; justify-content: flex-end; }
         .small-text { font-size: 0.75rem; color: #94a3b8; }
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #facc15;
-            border: none;
-            border-radius: 40px;
-            padding: 8px 16px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 1000;
-        }
+        .theme-toggle { position: fixed; top: 20px; right: 20px; background: #facc15; border: none; border-radius: 40px; padding: 8px 16px; font-weight: bold; cursor: pointer; z-index: 1000; }
         body.light .theme-toggle { background: #1e293b; color: white; }
     </style>
 </head>
@@ -154,7 +63,6 @@
     <button class="theme-toggle" id="themeToggle">🌞 Light mode</button>
     <h1>🛩️ Runway Viz – Advanced Pilot Dashboard</h1>
     <div class="dashboard">
-        <!-- LEFT PANEL: Airfields -->
         <div class="left-panel">
             <div class="card">
                 <h3>📡 Airfield Weather & Alerts</h3>
@@ -182,8 +90,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- RIGHT PANEL: Aircraft & Airfield Editor -->
         <div class="right-panel">
             <div class="card">
                 <h3>✈️ Aircraft Profiles</h3>
@@ -207,7 +113,6 @@
             </div>
         </div>
     </div>
-
     <script>
         // Theme toggle
         const themeToggle = document.getElementById('themeToggle');
@@ -235,23 +140,26 @@
             { name: "Cessna 172", max_crosswind: 15, max_headwind: 25, max_tailwind: 12, min_visibility: 3, avoid_thunderstorm: true },
             { name: "Piper Seneca", max_crosswind: 20, max_headwind: 30, max_tailwind: 15, min_visibility: 2, avoid_thunderstorm: false }
         ];
+        // Only VGHS and VGEG by default
         const DEFAULT_AIRFIELDS = [
-            { icao: "VGZR", runway_heading: 140 },
-            { icao: "VGEG", runway_heading: 160 },
-            { icao: "VGSY", runway_heading: 130 },
-            { icao: "VGJR", runway_heading: 120 }
+            { icao: "VGHS", runway_heading: 140 },
+            { icao: "VGEG", runway_heading: 160 }
         ];
 
         function loadData() {
             const storedAircraft = localStorage.getItem("runwayviz_aircraft");
             aircraftList = storedAircraft ? JSON.parse(storedAircraft) : [...DEFAULT_AIRCRAFT];
             const storedAirfields = localStorage.getItem("runwayviz_airfields");
-            airfieldConfigs = storedAirfields ? JSON.parse(storedAirfields) : [...DEFAULT_AIRFIELDS];
+            if (storedAirfields) {
+                airfieldConfigs = JSON.parse(storedAirfields);
+                // Optionally, if stored contains VGSY/VGJR, we could filter, but let user manage.
+            } else {
+                airfieldConfigs = [...DEFAULT_AIRFIELDS];
+            }
         }
         function saveAircraft() { localStorage.setItem("runwayviz_aircraft", JSON.stringify(aircraftList)); }
         function saveAirfields() { localStorage.setItem("runwayviz_airfields", JSON.stringify(airfieldConfigs)); }
 
-        // Weather parsing (same as before)
         function parseWeatherFromReport(text) {
             const lines = text.split(/\r?\n/);
             let airfields = {};
@@ -274,8 +182,9 @@
                         const visMatch = line.match(/Vis:\s*(\d+(?:\.\d+)?)\s*mi/);
                         if (visMatch) currentVis = parseFloat(visMatch[1]);
                     }
-                    if (line.includes("Raw METAR:")) {
-                        currentRaw = line.replace("Raw METAR:", "").trim();
+                    if (line.includes("Raw METAR:") || line.includes("Raw:")) {
+                        const rawMatch = line.match(/Raw:?\s*(.*)/);
+                        if (rawMatch) currentRaw = rawMatch[1];
                         const metarWind = currentRaw.match(/(\d{3})(\d{2})KT/);
                         if (metarWind && currentWind) {
                             currentWind.dir = parseInt(metarWind[1]);
@@ -479,7 +388,7 @@
             }
         };
         document.getElementById("addAirfieldBtn").addEventListener("click", () => {
-            const newIcao = prompt("Enter ICAO code (e.g., VGZR)")?.toUpperCase();
+            const newIcao = prompt("Enter ICAO code (e.g., VGHS)")?.toUpperCase();
             if (!newIcao) return;
             const newHeading = parseFloat(prompt("Runway heading (0-359)", 0));
             if (isNaN(newHeading)) return;
