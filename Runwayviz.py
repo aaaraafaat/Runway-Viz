@@ -1,40 +1,36 @@
 import requests
-import os
 import sys
-import time
+import re
 from datetime import datetime
 
 if sys.platform == "win32":
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-AIRFIELDS = ['VGZR', 'VGEG', 'VGSY', 'VGJR']  # Dhaka, Chittagong, Sylhet, Jessore
-CROSSWIND_LIMIT_KNOTS = 12
-VISIBILITY_LIMIT_MILES = 5
+# Updated ICAO codes – VGHS for Dhaka instead of VGZR
+AIRFIELDS = ['VGHS', 'VGEG', 'VGSY', 'VGJR']
+CROSSWIND_LIMIT = 12
+VISIBILITY_LIMIT = 5
 
 def fetch_metar_checkwx(icao, api_key):
-    """Fetch METAR from CheckWX API (requires API key)"""
     url = f"https://api.checkwx.com/metar/{icao}/decoded"
     headers = {"X-API-Key": api_key}
     try:
-        response = requests.get(url, headers=headers, timeout=15)
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('results') and len(data['results']) > 0:
-                return data['results'][0].get('raw', '')
-    except Exception as e:
-        print(f"CheckWX error for {icao}: {e}")
+        resp = requests.get(url, headers=headers, timeout=10)
+        if resp.status_code == 200:
+            data = resp.json()
+            if isinstance(data, dict) and data.get('results', 0) > 0:
+                return data['data'][0].get('raw_text', '')
+    except:
+        pass
     return None
 
 def fetch_metar_noaa(icao):
-    """Fallback to NOAA"""
-    url = f"https://aviationweather.gov/api/data/metar?ids={icao}&format=json"
+    url = f"https://aviationweather.gov/cgi-bin/data/metar.php?ids={icao}"
     try:
-        response = requests.get(url, timeout=15)
-        if response.status_code == 200:
-            data = response.json()
-            if data and isinstance(data, list) and len(data) > 0:
-                return data[0].get('rawOb', '')
+        resp = requests.get(url, timeout=10)
+        if resp.status_code == 200 and resp.text.strip() and "No data" not in resp.text:
+            return resp.text.strip()
     except:
         pass
     return None
@@ -45,41 +41,34 @@ def fetch_metar(icao):
         metar = fetch_metar_checkwx(icao, api_key)
         if metar:
             return metar
-    # Fallback to NOAA
     return fetch_metar_noaa(icao)
 
-def parse_metar_simple(metar_string):
-    import re
-    # Wind speed and direction
-    wind_match = re.search(r'(\d{3})(\d{2})KT', metar_string)
+def parse_metar(metar):
+    wind_match = re.search(r'(\d{3})(\d{2})KT', metar)
     if wind_match:
         wind_dir = int(wind_match.group(1))
         wind_speed = int(wind_match.group(2))
     else:
         wind_dir = None
         wind_speed = 0
-    # Visibility in meters to miles
-    vis_match = re.search(r'(\d{4}) ', metar_string)
+    vis_match = re.search(r'(\d{4}) ', metar)
     if vis_match:
-        visibility_miles = int(vis_match.group(1)) / 1609.34
+        vis_miles = int(vis_match.group(1)) / 1609.34
     else:
-        visibility_miles = 10
-    # Thunderstorm
-    has_ts = 'TS' in metar_string or 'TSRA' in metar_string
+        vis_miles = 10
     alerts = []
-    if wind_speed > CROSSWIND_LIMIT_KNOTS:
-        alerts.append(f"CROSSWIND ALERT: {wind_speed} kts (limit {CROSSWIND_LIMIT_KNOTS})")
-    if visibility_miles < VISIBILITY_LIMIT_MILES:
-        alerts.append(f"LOW VISIBILITY: {visibility_miles:.1f} miles (limit {VISIBILITY_LIMIT_MILES})")
+    if wind_speed > CROSSWIND_LIMIT:
+        alerts.append(f"CROSSWIND ALERT: {wind_speed} kts (limit {CROSSWIND_LIMIT})")
+    if vis_miles < VISIBILITY_LIMIT:
+        alerts.append(f"LOW VISIBILITY: {vis_miles:.1f} miles (limit {VISIBILITY_LIMIT})")
+    has_ts = 'TS' in metar or 'TSRA' in metar
     return {
-        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M UTC'),
-        'alerts': alerts,
-        'is_safe': len(alerts) == 0,
-        'wind_dir': wind_dir,
         'wind_speed': wind_speed,
-        'visibility_miles': round(visibility_miles, 1),
+        'wind_dir': wind_dir,
+        'visibility': round(vis_miles, 1),
+        'alerts': alerts,
         'has_thunderstorm': has_ts,
-        'raw_metar': metar_string[:120]
+        'raw': metar[:100]
     }
 
 def generate_report():
@@ -87,19 +76,23 @@ def generate_report():
     for icao in AIRFIELDS:
         metar = fetch_metar(icao)
         if metar:
-            wx = parse_metar_simple(metar)
-            status = "SAFE" if wx['is_safe'] else "ALERT"
+            wx = parse_metar(metar)
+            status = "SAFE" if not wx['alerts'] else "ALERT"
             lines.append(f"\n{icao}: {status}")
             lines.extend(wx['alerts'])
-            lines.append(f"   Wind: {wx['wind_speed']} kts {wx['wind_dir']}° | Vis: {wx['visibility_miles']} mi")
+            wind_str = f"{wx['wind_speed']} kts"
+            if wx['wind_dir']:
+                wind_str += f" {wx['wind_dir']}°"
+            lines.append(f"   Wind: {wind_str} | Vis: {wx['visibility']} mi")
             if wx['has_thunderstorm']:
                 lines.append("   ⛈️ Thunderstorm reported")
-            lines.append(f"   Raw METAR: {wx['raw_metar']}...")
+            lines.append(f"   Raw METAR: {wx['raw']}...")
         else:
-            lines.append(f"\n{icao}: FETCH FAILED - check ICAO or API")
+            lines.append(f"\n{icao}: FETCH FAILED - no METAR data")
     return "\n".join(lines)
 
 if __name__ == "__main__":
+    import os
     try:
         report = generate_report()
         print(report)
@@ -108,6 +101,4 @@ if __name__ == "__main__":
         print("\n[SUCCESS] Report saved")
     except Exception as e:
         print(f"CRASH: {e}")
-        import traceback
-        traceback.print_exc()
         sys.exit(1)
