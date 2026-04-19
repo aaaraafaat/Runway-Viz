@@ -2,7 +2,7 @@
 import requests
 import re
 from datetime import datetime
-from .base import WeatherFetcher
+from sources.base import WeatherFetcher
 import config
 
 class CheckWXFetcher(WeatherFetcher):

@@ -7,7 +7,7 @@ import pytesseract
 from PIL import Image
 from io import BytesIO
 from datetime import datetime
-from .base import WeatherFetcher
+from sources.base import WeatherFetcher
 import config
 
 class BAFOCRfetcher(WeatherFetcher):
