@@ -1,12 +1,12 @@
 === Runway Viz Report ===
-Generated: 2026-04-19 13:03 UTC
+Generated: 2026-04-19 13:26 UTC
 
 VGZR: FETCH FAILED - check network or API
 
 VGEG: ALERT
 LOW VISIBILITY: 3.1 miles (limit 5)
-   Wind: 12 kts | Vis: 3.1 mi
-   Raw METAR: METAR VGEG 191200Z 24012KT 5000 HZ FEW018 30/26 Q1005 NOSIG...
+   Wind: 10 kts | Vis: 3.1 mi
+   Raw METAR: METAR VGEG 191300Z 21010KT 5000 HZ FEW018 30/26 Q1006 NOSIG...
 
 VGSY: FETCH FAILED - check network or API
 
