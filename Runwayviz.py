@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 import time
 import sys
+import os
 
 # Force UTF-8 for Windows console (fixes UnicodeEncodeError)
 if sys.platform == "win32":
@@ -22,7 +23,7 @@ def fetch_metar_with_retry(icao, retries=2):
     url = f"https://aviationweather.gov/api/data/metar?ids={icao}&format=json"
     for attempt in range(retries):
         try:
-            response = requests.get(url, timeout=15)  # increased timeout
+            response = requests.get(url, timeout=15)
             if response.status_code == 200:
                 data = response.json()
                 if data and isinstance(data, list) and len(data) > 0:
@@ -36,28 +37,24 @@ def fetch_metar_with_retry(icao, retries=2):
 
 def parse_metar_simple(metar_string):
     """Manual METAR parser (avoids metar library bugs)"""
-    # Example METAR: "VGZR 190500Z 31005KT 6000 HZ SCT015 BKN100 28/24 Q1009 NOSIG"
-    # We'll extract wind and visibility using simple regex
     import re
     
     # Extract wind: direction and speed in knots (e.g., 31005KT)
     wind_match = re.search(r'(\d{3})(\d{2})KT', metar_string)
     if wind_match:
-        wind_dir = int(wind_match.group(1))
         wind_speed_knots = int(wind_match.group(2))
     else:
         wind_speed_knots = 0
     
     # Extract visibility in statute miles (e.g., 6000 = 6000 meters, convert)
-    vis_match = re.search(r'(\d{4}) ', metar_string)  # 4-digit visibility in meters
+    vis_match = re.search(r'(\d{4}) ', metar_string)
     if vis_match:
         visibility_meters = int(vis_match.group(1))
         visibility_miles = visibility_meters / 1609.34
     else:
         visibility_miles = 10  # default good visibility
     
-    # Crosswind limit check (simplified: assume worst-case crosswind = total wind speed)
-    crosswind = wind_speed_knots
+    crosswind = wind_speed_knots  # simplified: assume worst-case
     
     alerts = []
     if crosswind > CROSSWIND_LIMIT_KNOTS:
@@ -96,10 +93,16 @@ def generate_report():
     
     return "\n".join(report_lines)
 
+# ---------- THE MAIN BLOCK WITH TRY-EXCEPT (this is what you asked for) ----------
 if __name__ == "__main__":
-    report = generate_report()
-    print(report)
-    # Write to file with UTF-8 encoding to avoid Unicode error
-    with open("latest_report.txt", "w", encoding='utf-8') as f:
-        f.write(report)
-    print("\n[SUCCESS] Report saved to latest_report.txt")
+    try:
+        report = generate_report()
+        print(report)
+        with open("latest_report.txt", "w", encoding='utf-8') as f:
+            f.write(report)
+        print("\n[SUCCESS] Report saved to latest_report.txt")
+    except Exception as e:
+        print(f"CRASH: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
