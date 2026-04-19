@@ -17,8 +17,23 @@ AIRFIELDS = ['VGZR', 'VGEG', 'VGSY', 'VGJR']  # Dhaka, Chittagong, Sylhet, Jesso
 CROSSWIND_LIMIT_KNOTS = 12
 VISIBILITY_LIMIT_MILES = 5
 
-def fetch_metar_with_retry(icao, retries=2):
-    """Fetch METAR from NOAA with retry and timeout"""
+
+ddef fetch_metar_with_retry(icao, retries=2):
+    # Try CheckWX first (more reliable for BD airports)
+    api_key = os.environ.get("CHECKWX_API_KEY")
+    if api_key:
+        url = f"https://api.checkwx.com/metar/{icao}/decoded"
+        headers = {"X-API-Key": api_key}
+        try:
+            response = requests.get(url, headers=headers, timeout=15)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('results') and len(data['results']) > 0:
+                    return data['results'][0].get('raw', '')
+        except:
+            pass
+    
+    # Fallback to NOAA
     url = f"https://aviationweather.gov/api/data/metar?ids={icao}&format=json"
     for attempt in range(retries):
         try:
@@ -26,11 +41,8 @@ def fetch_metar_with_retry(icao, retries=2):
             if response.status_code == 200:
                 data = response.json()
                 if data and isinstance(data, list) and len(data) > 0:
-                    raw = data[0].get('rawOb', '')
-                    if raw:
-                        return raw
-        except Exception as e:
-            print(f"Attempt {attempt+1} failed for {icao}: {e}")
+                    return data[0].get('rawOb', '')
+        except:
             time.sleep(2)
     return None
 
