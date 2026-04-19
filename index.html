@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runway Viz – Pilot Dashboard</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f2f5;
+        }
+        h1 { color: #1e3a8a; }
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        label { font-weight: bold; font-size: 14px; }
+        select, input, button {
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background: #2563eb; }
+        .add-btn { background: #10b981; }
+        .add-btn:hover { background: #059669; }
+        .report-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        .airfield-card {
+            border-left: 4px solid #ccc;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+        .airfield-card.alert-wind { border-left-color: #dc2626; background: #fee2e2; }
+        .airfield-card.alert-vis { border-left-color: #f59e0b; background: #fffbeb; }
+        .airfield-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        .warning { color: #dc2626; font-weight: bold; margin: 5px 0; }
+        .safe { color: #16a34a; }
+        .meta { font-family: monospace; font-size: 13px; color: #4b5563; margin-top: 8px; }
+        hr { margin: 10px 0; }
+        .footer { margin-top: 20px; font-size: 12px; color: #6c757d; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>🛩️ Runway Viz – Live Weather Alerts</h1>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label>✈️ Select Aircraft</label>
+            <select id="aircraftSelect"></select>
+        </div>
+        <div class="control-group">
+            <label>➕ Add New Aircraft</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="newAircraftName" placeholder="e.g., Boeing 737" style="width: 160px;">
+                <input type="number" id="newAircraftLimit" placeholder="Crosswind (kts)" style="width: 120px;">
+                <button id="addAircraftBtn" class="add-btn">Add</button>
+            </div>
+        </div>
+        <div class="control-group">
+            <button id="refreshBtn">🔄 Refresh Now</button>
+        </div>
+    </div>
+    
+    <div class="report-container">
+        <div id="reportContent">Loading weather data...</div>
+    </div>
+    <div class="footer">
+        Data updates hourly. Last fetch from GitHub raw file.
+    </div>
+
+    <script>
+        // ---------- AIRCRAFT MANAGEMENT (localStorage) ----------
+        let aircraftList = []; // each: { name, limit }
+
+        // Default presets
+        const defaultAircraft = [
+            { name: "Cessna 152", limit: 12 },
+            { name: "Cessna 172", limit: 15 },
+            { name: "Piper Seneca", limit: 20 },
+            { name: "Cirrus SR22", limit: 18 },
+            { name: "DA40 Diamond", limit: 14 }
+        ];
+
+        function loadAircraftFromStorage() {
+            const stored = localStorage.getItem("runwayviz_aircraft");
+            if (stored) {
+                aircraftList = JSON.parse(stored);
+            } else {
+                aircraftList = [...defaultAircraft];
+                saveAircraftToStorage();
+            }
+        }
+
+        function saveAircraftToStorage() {
+            localStorage.setItem("runwayviz_aircraft", JSON.stringify(aircraftList));
+        }
+
+        function populateAircraftSelect() {
+            const select = document.getElementById("aircraftSelect");
+            select.innerHTML = "";
+            aircraftList.forEach((ac, idx) => {
+                const option = document.createElement("option");
+                option.value = idx;
+                option.textContent = `${ac.name} (${ac.limit} kts crosswind limit)`;
+                select.appendChild(option);
+            });
+            // Also store limits in a map for quick lookup
+            window.aircraftLimits = {};
+            aircraftList.forEach(ac => { window.aircraftLimits[ac.name] = ac.limit; });
+        }
+
+        function addNewAircraft() {
+            const nameInput = document.getElementById("newAircraftName");
+            const limitInput = document.getElementById("newAircraftLimit");
+            const name = nameInput.value.trim();
+            const limit = parseFloat(limitInput.value);
+            if (!name || isNaN(limit) || limit <= 0) {
+                alert("Please enter a valid aircraft name and crosswind limit (positive number).");
+                return;
+            }
+            // Check duplicate
+            if (aircraftList.some(ac => ac.name.toLowerCase() === name.toLowerCase())) {
+                alert("Aircraft already exists!");
+                return;
+            }
+            aircraftList.push({ name, limit });
+            saveAircraftToStorage();
+            populateAircraftSelect();
+            // Clear inputs
+            nameInput.value = "";
+            limitInput.value = "";
+            // Re-render report with new selection
+            loadReport();
+        }
+
+        // ---------- WEATHER REPORT PARSING ----------
+        // Your GitHub raw file URL (change USERNAME/REPO)
+        const RAW_REPORT_URL = "https://raw.githubusercontent.com/YOUR_USERNAME/runway-viz/main/latest_report.txt";
+        // Replace YOUR_USERNAME with your actual GitHub username
+        // Example: "https://raw.githubusercontent.com/johndoe/runway-viz/main/latest_report.txt"
+
+        let currentRawText = "";
+
+        function parseWindFromLine(line) {
+            // Looks for "Wind: 12 kts" or "Wind: 12 kts | Vis: ..."
+            const match = line.match(/Wind:\s*(\d+(?:\.\d+)?)\s*kts/);
+            return match ? parseFloat(match[1]) : null;
+        }
+
+        function parseVisibilityFromLine(line) {
+            const match = line.match(/Vis:\s*(\d+(?:\.\d+)?)\s*mi/);
+            return match ? parseFloat(match[1]) : null;
+        }
+
+        function getAirfieldFromLine(line) {
+            // e.g., "VGZR: ALERT" or "VGZR: SAFE"
+            const match = line.match(/^([A-Z]{4}):/);
+            return match ? match[1] : null;
+        }
+
+        async function loadReport() {
+            const reportDiv = document.getElementById("reportContent");
+            reportDiv.innerHTML = "<em>Fetching latest weather...</em>";
+            
+            try {
+                const response = await fetch(RAW_REPORT_URL, { cache: "no-store" });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const text = await response.text();
+                currentRawText = text;
+                renderReport(text);
+            } catch (err) {
+                reportDiv.innerHTML = `<div style="color:red;">⚠️ Failed to load report: ${err.message}. Make sure your GitHub repo is public and the file exists.</div>`;
+            }
+        }
+
+        function renderReport(rawText) {
+            const selectedIndex = document.getElementById("aircraftSelect").value;
+            if (selectedIndex === null) return;
+            const aircraft = aircraftList[parseInt(selectedIndex)];
+            if (!aircraft) return;
+            const crosswindLimit = aircraft.limit;
+            const aircraftName = aircraft.name;
+
+            const lines = rawText.split(/\r?\n/);
+            let html = `<div style="margin-bottom: 12px;"><strong>Selected Aircraft:</strong> ${aircraftName} (max crosswind ${crosswindLimit} kts)</div>`;
+            
+            let currentAirfield = null;
+            let currentData = { wind: null, vis: null, rawMetar: "", alerts: [], statusLine: "" };
+            
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                // Check if line starts a new airfield
+                const airfieldCode = getAirfieldFromLine(line);
+                if (airfieldCode) {
+                    // Save previous airfield if exists
+                    if (currentAirfield) {
+                        html += renderAirfieldCard(currentAirfield, currentData, crosswindLimit);
+                    }
+                    // Start new
+                    currentAirfield = airfieldCode;
+                    currentData = { wind: null, vis: null, rawMetar: "", alerts: [], statusLine: line };
+                } else if (currentAirfield) {
+                    // Collect wind/visibility
+                    const wind = parseWindFromLine(line);
+                    if (wind !== null) currentData.wind = wind;
+                    const vis = parseVisibilityFromLine(line);
+                    if (vis !== null) currentData.vis = vis;
+                    if (line.includes("Raw METAR:")) {
+                        currentData.rawMetar = line.replace("Raw METAR:", "").trim();
+                    }
+                    // Collect any existing alerts from the report (like LOW VISIBILITY)
+                    if (line.includes("LOW VISIBILITY") || line.includes("CROSSWIND ALERT")) {
+                        currentData.alerts.push(line);
+                    }
+                }
+            }
+            // Last airfield
+            if (currentAirfield) {
+                html += renderAirfieldCard(currentAirfield, currentData, crosswindLimit);
+            }
+            
+            document.getElementById("reportContent").innerHTML = html;
+        }
+
+        function renderAirfieldCard(icao, data, limitKts) {
+            const wind = data.wind;
+            const vis = data.vis;
+            const isWindAlert = wind !== null && wind > limitKts;
+            const isVisAlert = vis !== null && vis < 5;  // visibility limit 5 miles
+            let alertClass = "";
+            if (isWindAlert) alertClass = "alert-wind";
+            else if (isVisAlert) alertClass = "alert-vis";
+            
+            let warningsHtml = "";
+            if (isWindAlert) {
+                warningsHtml += `<div class="warning">💨 WIND ALERT: ${wind} kts exceeds ${limitKts} kts limit for selected aircraft</div>`;
+            } else if (wind !== null) {
+                warningsHtml += `<div class="safe">✓ Wind ${wind} kts (within ${limitKts} kts limit)</div>`;
+            }
+            if (isVisAlert && vis !== null) {
+                warningsHtml += `<div class="warning">🌫️ LOW VISIBILITY: ${vis} miles (below 5 miles limit)</div>`;
+            }
+            
+            // Also show any pre-existing alerts from raw report (like METAR parse failures)
+            let extraAlerts = "";
+            if (data.alerts && data.alerts.length) {
+                extraAlerts = `<div>${data.alerts.map(a => `<span class="warning">⚠️ ${a}</span>`).join('<br>')}</div>`;
+            }
+            
+            return `
+                <div class="airfield-card ${alertClass}">
+                    <div class="airfield-title">${icao}</div>
+                    <div>${data.statusLine}</div>
+                    ${warningsHtml}
+                    ${extraAlerts}
+                    ${data.rawMetar ? `<div class="meta">📡 ${data.rawMetar.substring(0, 100)}...</div>` : ""}
+                </div>
+            `;
+        }
+
+        // ---------- INITIALIZATION ----------
+        function init() {
+            loadAircraftFromStorage();
+            populateAircraftSelect();
+            loadReport();
+            
+            // Event listeners
+            document.getElementById("aircraftSelect").addEventListener("change", () => {
+                if (currentRawText) renderReport(currentRawText);
+            });
+            document.getElementById("refreshBtn").addEventListener("click", loadReport);
+            document.getElementById("addAircraftBtn").addEventListener("click", addNewAircraft);
+            
+            // Auto-refresh every 5 minutes
+            setInterval(loadReport, 300000);
+        }
+        
+        init();
+    </script>
+</body>
+</html>
