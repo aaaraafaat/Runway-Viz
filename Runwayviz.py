@@ -17,7 +17,7 @@ if sys.platform == "win32":
 def generate_report():
     lines = ["=== Runway Viz Report ===", f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}"]
     
-    fetchers = [NOAAFetcher(), BAFOCRfetcher(), CheckWXFetcher()]
+    fetchers = [NOAAFetcher(), CheckWXFetcher()]
     
     for icao in config.AIRFIELDS:
         weather = None
