@@ -73,6 +73,8 @@
 </head>
 <body>
     <h1>🛩️ Runway Viz – Advanced Weather & Aircraft Limits</h1>
+    <button id="darkModeToggle" style="position: fixed; top: 20px; right: 20px;">🌙 Dark Mode</button>
+    
     <div class="dashboard">
         <!-- LEFT PANEL: Airfields -->
         <div class="left-panel">
@@ -84,6 +86,11 @@
 
         <!-- RIGHT PANEL: Aircraft Management -->
         <div class="right-panel">
+            <div class="card" style="text-align: center;">
+                <h3>🛫 Runway Orientation (North up)</h3>
+                <canvas id="runwayCanvas" width="200" height="200" style="background: #2d3748; border-radius: 12px;"></canvas>
+                <div id="windDirectionText"></div>
+            </div>
             <div class="card">
                 <h3>✈️ Aircraft Profiles</h3>
                 <div id="aircraftList">Loading aircraft...</div>
@@ -114,6 +121,7 @@
     </div>
 
     <script>
+        
         // ---------- GLOBAL DATA ----------
         let aircraftList = [];      // each: { name, max_crosswind, max_headwind, max_tailwind, min_visibility, avoid_thunderstorm }
         let runwayData = {};        // { "VGZR": { runway_heading: 140 }, ... }
