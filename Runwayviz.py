@@ -1,4 +1,5 @@
 import requests
+import os
 import sys
 import re
 from datetime import datetime
@@ -7,7 +8,7 @@ if sys.platform == "win32":
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-# Updated ICAO codes – VGHS for Dhaka instead of VGZR
+# Corrected ICAO codes
 AIRFIELDS = ['VGHS', 'VGEG', 'VGSY', 'VGJR']
 CROSSWIND_LIMIT = 12
 VISIBILITY_LIMIT = 5
@@ -20,6 +21,7 @@ def fetch_metar_checkwx(icao, api_key):
         if resp.status_code == 200:
             data = resp.json()
             if isinstance(data, dict) and data.get('results', 0) > 0:
+                # Extract raw_text from the first result
                 return data['data'][0].get('raw_text', '')
     except:
         pass
@@ -92,7 +94,6 @@ def generate_report():
     return "\n".join(lines)
 
 if __name__ == "__main__":
-    import os
     try:
         report = generate_report()
         print(report)
