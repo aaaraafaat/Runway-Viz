@@ -3,94 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Runway Viz – Advanced Pilot Dashboard</title>
+    <title>Runway Viz – Pilot Dashboard</title>
     <style>
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+            transition: background 0.3s, color 0.2s;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background: #f0f2f5;
+            background: #0a0f1e;
+            color: #e2e8f0;
         }
+        /* Dark mode is default – you can add a light mode toggle later */
         .dashboard {
             display: flex;
-            gap: 20px;
+            gap: 24px;
             flex-wrap: wrap;
         }
         .left-panel {
             flex: 2;
-            min-width: 300px;
+            min-width: 320px;
         }
         .right-panel {
-            flex: 1;
+            flex: 1.2;
             min-width: 280px;
         }
         .card {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            border: 1px solid #334155;
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #facc15;
+            border-left: 4px solid #facc15;
+            padding-left: 12px;
         }
         .airfield {
-            border-left: 4px solid #ccc;
+            background: #0f172a;
+            border-left: 4px solid #475569;
             margin-bottom: 16px;
-            padding: 12px;
-            background: #f9fafb;
-            border-radius: 8px;
+            padding: 16px;
+            border-radius: 16px;
+            transition: 0.2s;
         }
-        .airfield.unsafe { border-left-color: #dc2626; background: #fee2e2; }
-        .airfield.safe { border-left-color: #16a34a; background: #f0fdf4; }
+        .airfield.unsafe {
+            border-left-color: #ef4444;
+            background: #1e1a2a;
+        }
+        .airfield.safe {
+            border-left-color: #22c55e;
+        }
+        .airfield-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .icao-code {
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: #facc15;
+        }
+        .wind-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #0f172a;
+            padding: 4px 12px;
+            border-radius: 40px;
+        }
+        .windsock {
+            font-size: 1.2rem;
+        }
+        .windsock.green { color: #22c55e; }
+        .windsock.yellow { color: #eab308; }
+        .windsock.red { color: #ef4444; }
+        .badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: #334155;
+        }
+        .badge.ts { background: #b91c1c; color: white; }
+        button {
+            background: #3b82f6;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button:hover { background: #2563eb; }
+        button.danger { background: #dc2626; }
+        button.danger:hover { background: #b91c1c; }
+        button.secondary { background: #475569; }
+        input, select {
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 8px;
+            border-radius: 8px;
+            color: #e2e8f0;
+        }
         .aircraft-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px;
+            background: #0f172a;
+            padding: 10px;
             margin: 8px 0;
-            border-radius: 6px;
+            border-radius: 12px;
         }
-        .aircraft-safe { background: #dcfce7; color: #166534; }
-        .aircraft-unsafe { background: #fee2e2; color: #991b1b; }
-        button, input, select {
-            padding: 6px 10px;
-            margin: 4px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
+        .aircraft-safe { background: #14532d; color: #bbf7d0; }
+        .aircraft-unsafe { background: #7f1d1d; color: #fecaca; }
+        .add-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
         }
-        button {
-            background: #1e3a8a;
-            color: white;
-            cursor: pointer;
+        .add-form input { flex: 1; min-width: 70px; }
+        hr { border-color: #334155; margin: 16px 0; }
+        .runway-svg {
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+            margin-bottom: 16px;
         }
-        button.danger { background: #dc2626; }
-        .add-form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-        .add-form input { flex: 1; min-width: 80px; }
-        hr { margin: 12px 0; }
-        h3 { margin-top: 0; }
-        .badge { font-size: 12px; padding: 2px 6px; border-radius: 12px; }
-        .met-warning { background: #f59e0b; color: white; }
+        .airfield-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .small-text { font-size: 0.75rem; color: #94a3b8; }
     </style>
 </head>
 <body>
-    <h1>🛩️ Runway Viz – Advanced Weather & Aircraft Limits</h1>
-    <button id="darkModeToggle" style="position: fixed; top: 20px; right: 20px;">🌙 Dark Mode</button>
-    
+    <h1>🛩️ Runway Viz – Advanced Pilot Dashboard</h1>
     <div class="dashboard">
         <!-- LEFT PANEL: Airfields -->
         <div class="left-panel">
             <div class="card">
                 <h3>📡 Airfield Weather & Alerts</h3>
                 <div id="airfieldsList">Loading weather data...</div>
+                <div class="airfield-actions" style="margin-top: 16px;">
+                    <button id="addAirfieldBtn">➕ Add New Airfield</button>
+                    <button id="refreshWeatherBtn">🔄 Refresh</button>
+                </div>
+                <div class="small-text" style="margin-top: 12px;">💡 Windsock color: 🟢 0-5 kts | 🟡 5-15 kts | 🔴 >15 kts</div>
+            </div>
+            <div class="card">
+                <h3>🛬 Runway Orientation (North up)</h3>
+                <div class="runway-svg">
+                    <svg width="200" height="200" viewBox="0 0 200 200">
+                        <circle cx="100" cy="100" r="90" stroke="#facc15" stroke-width="2" fill="none"/>
+                        <line x1="100" y1="10" x2="100" y2="190" stroke="#facc15" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="10" y1="100" x2="190" y2="100" stroke="#475569" stroke-width="1"/>
+                        <polygon points="100,10 90,30 110,30" fill="#facc15"/>
+                        <text x="100" y="35" fill="#facc15" font-size="12" text-anchor="middle">N</text>
+                        <text x="100" y="185" fill="#94a3b8" font-size="10" text-anchor="middle">S</text>
+                        <rect x="70" y="60" width="60" height="80" fill="#334155" rx="4"/>
+                        <text x="100" y="105" fill="white" font-size="10" text-anchor="middle">RWY</text>
+                    </svg>
+                    <div class="small-text">Runway heading relative to North</div>
+                </div>
             </div>
         </div>
 
-        <!-- RIGHT PANEL: Aircraft Management -->
+        <!-- RIGHT PANEL: Aircraft & Airfield Editor -->
         <div class="right-panel">
-            <div class="card" style="text-align: center;">
-                <h3>🛫 Runway Orientation (North up)</h3>
-                <canvas id="runwayCanvas" width="200" height="200" style="background: #2d3748; border-radius: 12px;"></canvas>
-                <div id="windDirectionText"></div>
-            </div>
             <div class="card">
                 <h3>✈️ Aircraft Profiles</h3>
                 <div id="aircraftList">Loading aircraft...</div>
@@ -103,76 +194,60 @@
                     <input type="number" id="acTail" placeholder="Tailwind max" style="flex:1">
                     <input type="number" id="acVis" placeholder="Min vis (mi)" style="flex:1">
                     <label style="display:flex; align-items:center;"><input type="checkbox" id="acThunder"> Avoid TS</label>
-                    <button id="addBtn">Add</button>
+                    <button id="addAircraftBtn">Add</button>
                 </div>
-                <p style="font-size:12px; margin-top:8px;">💡 To edit/delete, click on aircraft name.</p>
             </div>
             <div class="card">
-                <h3>🛬 Runway Headings (for wind components)</h3>
-                <div id="runwayList"></div>
-                <button id="editRunwaysBtn">Edit Runway Headings</button>
-            </div>
-            <div class="card">
-                <h3>🗺️ Airfields (ICAO + Runway)</h3>
-                <div id="airfieldsEditor"></div>
-                <button id="addAirfieldBtn">+ Add Airfield</button>
+                <h3>🗺️ Airfields (ICAO & Runway Heading)</h3>
+                <div id="airfieldEditorList"></div>
+                <div class="small-text">Click Edit to change runway heading. Delete removes from dashboard (weather fetch still needs Python update).</div>
             </div>
         </div>
     </div>
 
     <script>
-        
-        // ---------- GLOBAL DATA ----------
+        // ---------- DATA STORAGE ----------
         let aircraftList = [];      // each: { name, max_crosswind, max_headwind, max_tailwind, min_visibility, avoid_thunderstorm }
-        let runwayData = {};        // { "VGZR": { runway_heading: 140 }, ... }
-        let currentWeather = {      // parsed from latest_report.txt
-            rawText: "",
-            airfields: {}           // key: ICAO, value: { wind_speed, wind_dir, visibility, metar_raw, has_thunderstorm }
-        };
-        let selectedAircraftForRightPanel = null; // not needed, we show all aircraft status relative to selected airfield
-        let currentSelectedAirfield = null; // user selects an airfield to see aircraft suitability
+        let airfieldConfigs = [];   // each: { icao, runway_heading }
+        let currentWeather = { airfields: {} }; // from latest_report.txt
 
-        // URLs (change if needed)
+        // URLs
         const WEATHER_RAW_URL = "https://raw.githubusercontent.com/aaaraafaat/Runway-Viz/main/latest_report.txt";
-        const AIRCRAFT_JSON_URL = "https://raw.githubusercontent.com/aaaraafaat/Runway-Viz/main/aircraft_data.json";
-        const RUNWAY_JSON_URL = "https://raw.githubusercontent.com/aaaraafaat/Runway-Viz/main/runway_data.json";
+        const DEFAULT_AIRCRAFT = [
+            { name: "Cessna 152", max_crosswind: 12, max_headwind: 20, max_tailwind: 10, min_visibility: 3, avoid_thunderstorm: true },
+            { name: "Cessna 172", max_crosswind: 15, max_headwind: 25, max_tailwind: 12, min_visibility: 3, avoid_thunderstorm: true },
+            { name: "Piper Seneca", max_crosswind: 20, max_headwind: 30, max_tailwind: 15, min_visibility: 2, avoid_thunderstorm: false }
+        ];
+        const DEFAULT_AIRFIELDS = [
+            { icao: "VGZR", runway_heading: 140 },
+            { icao: "VGEG", runway_heading: 160 },
+            { icao: "VGSY", runway_heading: 130 },
+            { icao: "VGJR", runway_heading: 120 }
+        ];
 
-        // ---------- LOAD DATA FROM GITHUB JSON FILES ----------
-        async function loadAircraftFromJSON() {
-            try {
-                const res = await fetch(AIRCRAFT_JSON_URL + "?t=" + Date.now());
-                if (res.ok) {
-                    aircraftList = await res.json();
-                } else {
-                    // fallback defaults
-                    aircraftList = [
-                        { name: "Cessna 152", max_crosswind: 12, max_headwind: 20, max_tailwind: 10, min_visibility: 3, avoid_thunderstorm: true },
-                        { name: "Cessna 172", max_crosswind: 15, max_headwind: 25, max_tailwind: 12, min_visibility: 3, avoid_thunderstorm: true }
-                    ];
-                }
-                renderAircraftList();
-            } catch(e) { console.error(e); }
+        // ---------- LOAD/SAVE LOCALSTORAGE ----------
+        function loadData() {
+            const storedAircraft = localStorage.getItem("runwayviz_aircraft");
+            if (storedAircraft) aircraftList = JSON.parse(storedAircraft);
+            else aircraftList = [...DEFAULT_AIRCRAFT];
+
+            const storedAirfields = localStorage.getItem("runwayviz_airfields");
+            if (storedAirfields) airfieldConfigs = JSON.parse(storedAirfields);
+            else airfieldConfigs = [...DEFAULT_AIRFIELDS];
+        }
+        function saveAircraft() {
+            localStorage.setItem("runwayviz_aircraft", JSON.stringify(aircraftList));
+        }
+        function saveAirfields() {
+            localStorage.setItem("runwayviz_airfields", JSON.stringify(airfieldConfigs));
         }
 
-        async function loadRunwayData() {
-            try {
-                const res = await fetch(RUNWAY_JSON_URL + "?t=" + Date.now());
-                if (res.ok) {
-                    runwayData = await res.json();
-                } else {
-                    runwayData = { VGZR: { runway_heading: 140 }, VGEG: { runway_heading: 160 }, VGSY: { runway_heading: 130 }, VGJR: { runway_heading: 120 } };
-                }
-                renderRunwayList();
-            } catch(e) { console.error(e); }
-        }
-
-        // ---------- WEATHER PARSING (enhanced) ----------
+        // ---------- WEATHER PARSING (same as before, extracts wind, vis, TS) ----------
         function parseWeatherFromReport(text) {
             const lines = text.split(/\r?\n/);
             let airfields = {};
             let currentICAO = null;
             let currentWind = null, currentVis = null, currentRaw = "", hasTS = false;
-            
             for (let line of lines) {
                 const match = line.match(/^([A-Z]{4}):/);
                 if (match) {
@@ -184,10 +259,7 @@
                 } else if (currentICAO) {
                     if (line.includes("Wind:")) {
                         const spdMatch = line.match(/Wind:\s*(\d+(?:\.\d+)?)\s*kts/);
-                        const dirMatch = line.match(/Wind:\s*(\d+)\s*deg/); // not in our report, but we can get from raw METAR later
-                        if (spdMatch) {
-                            currentWind = { speed: parseFloat(spdMatch[1]), dir: null };
-                        }
+                        if (spdMatch) currentWind = { speed: parseFloat(spdMatch[1]), dir: null };
                     }
                     if (line.includes("Vis:")) {
                         const visMatch = line.match(/Vis:\s*(\d+(?:\.\d+)?)\s*mi/);
@@ -195,7 +267,6 @@
                     }
                     if (line.includes("Raw METAR:")) {
                         currentRaw = line.replace("Raw METAR:", "").trim();
-                        // extract wind direction from raw METAR (e.g., "24012KT" -> dir 240, speed 12)
                         const metarWind = currentRaw.match(/(\d{3})(\d{2})KT/);
                         if (metarWind && currentWind) {
                             currentWind.dir = parseInt(metarWind[1]);
@@ -209,57 +280,9 @@
                 airfields[currentICAO] = { wind_speed: currentWind?.speed, wind_dir: currentWind?.dir, visibility: currentVis, metar_raw: currentRaw, has_thunderstorm: hasTS };
             }
             return airfields;
-
-            // Dark mode toggle
-            const toggle = document.getElementById('darkModeToggle');
-            toggle.addEventListener('click', () => {
-                document.body.classList.toggle('dark');
-                localStorage.setItem('darkMode', document.body.classList.contains('dark'));
-            });
-            if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark');
-
-            // Function to draw runway based on heading
-            function drawRunway(heading) {
-                const canvas = document.getElementById('runwayCanvas');
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                const w = canvas.width, h = canvas.height;
-                ctx.clearRect(0, 0, w, h);
-                ctx.fillStyle = '#2d3748';
-                ctx.fillRect(0, 0, w, h);
-                // Draw north arrow
-                ctx.fillStyle = 'white';
-                ctx.font = '12px Arial';
-                ctx.fillText('N', w/2, 20);
-                // Draw runway line
-                const rad = heading * Math.PI / 180;
-                const length = 80;
-                const x1 = w/2 - length/2 * Math.sin(rad);
-                const y1 = h/2 - length/2 * Math.cos(rad);
-                const x2 = w/2 + length/2 * Math.sin(rad);
-                const y2 = h/2 + length/2 * Math.cos(rad);
-                ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.strokeStyle = 'yellow';
-                ctx.lineWidth = 6;
-                ctx.stroke();
-                ctx.fillStyle = 'white';
-                ctx.fillText(`${heading}°`, w/2 + 10, h/2);
-            }
-
-            // When user selects an airfield, update the runway diagram and windsock
-            function selectAirfieldForAircraft(icao) {
-                currentSelectedAirfield = icao;
-                const heading = runwayData[icao]?.runway_heading;
-                if (heading) drawRunway(heading);
-                renderAircraftListWithSuitability(icao);
-                // Update windsock icon in airfield card (we'll add a windsock span)
-            }
         }
 
-        // ---------- WIND COMPONENTS (headwind, crosswind, tailwind) ----------
-        // runwayHeading in degrees, windDir in degrees, windSpeed in knots
+        // ---------- WIND COMPONENTS ----------
         function computeWindComponents(windDir, windSpeed, runwayHeading) {
             if (!windDir || !runwayHeading) return { headwind: null, crosswind: null, tailwind: null };
             let angleDiff = Math.abs(windDir - runwayHeading);
@@ -271,78 +294,76 @@
             return { headwind: Math.abs(effectiveHeadwind), crosswind: Math.abs(crosswind), tailwind: tailwind };
         }
 
-        // ---------- CHECK IF AIRCRAFT IS SAFE FOR GIVEN AIRFIELD ----------
-        function isAircraftSafe(aircraft, airfieldWeather, runwayHeading) {
-            if (!airfieldWeather || airfieldWeather.wind_speed === undefined || airfieldWeather.visibility === undefined) return null; // unknown
-            if (aircraft.avoid_thunderstorm && airfieldWeather.has_thunderstorm) return false;
-            if (airfieldWeather.visibility < aircraft.min_visibility) return false;
-            
-            const components = computeWindComponents(airfieldWeather.wind_dir, airfieldWeather.wind_speed, runwayHeading);
-            if (components.headwind === null) return null; // missing wind dir or runway heading
-            if (components.crosswind > aircraft.max_crosswind) return false;
-            if (components.headwind > aircraft.max_headwind) return false;
-            if (components.tailwind > aircraft.max_tailwind) return false;
+        function isAircraftSafe(aircraft, wx, runwayHeading) {
+            if (!wx || wx.wind_speed === undefined || wx.visibility === undefined) return null;
+            if (aircraft.avoid_thunderstorm && wx.has_thunderstorm) return false;
+            if (wx.visibility < aircraft.min_visibility) return false;
+            const comp = computeWindComponents(wx.wind_dir, wx.wind_speed, runwayHeading);
+            if (comp.headwind === null) return null;
+            if (comp.crosswind > aircraft.max_crosswind) return false;
+            if (comp.headwind > aircraft.max_headwind) return false;
+            if (comp.tailwind > aircraft.max_tailwind) return false;
             return true;
         }
 
-        // ---------- RENDER LEFT PANEL (airfields) ----------
-        async function loadWeatherAndRender() {
-            try {
-                const res = await fetch(WEATHER_RAW_URL + "?t=" + Date.now());
-                if (!res.ok) throw new Error("Weather fetch failed");
-                const text = await res.text();
-                currentWeather.rawText = text;
-                currentWeather.airfields = parseWeatherFromReport(text);
-                renderAirfields();
-            } catch(e) {
-                document.getElementById("airfieldsList").innerHTML = `<span style="color:red">Error loading weather: ${e.message}</span>`;
-            }
-        }
-
+        // ---------- RENDER LEFT PANEL (Airfields with windsock) ----------
         function renderAirfields() {
             const container = document.getElementById("airfieldsList");
             if (!currentWeather.airfields || Object.keys(currentWeather.airfields).length === 0) {
-                container.innerHTML = "No weather data available.";
+                container.innerHTML = "<div>No weather data. Run GitHub Action first.</div>";
                 return;
             }
             let html = "";
-            for (let [icao, wx] of Object.entries(currentWeather.airfields)) {
-                const rwyHeading = runwayData[icao]?.runway_heading;
-                const safeStatus = (aircraft, acName) => {
-                    const safe = isAircraftSafe(aircraft, wx, rwyHeading);
-                    if (safe === null) return "?";
-                    return safe ? "✅" : "❌";
-                };
-                // For quick summary, show worst-case among all aircraft
+            for (let config of airfieldConfigs) {
+                const icao = config.icao;
+                const wx = currentWeather.airfields[icao];
+                if (!wx) {
+                    html += `<div class="airfield"><div class="airfield-header"><span class="icao-code">${icao}</span><span class="badge">No data (ICAO not in report)</span></div><div class="small-text">Check Python script AIRFIELDS list.</div></div>`;
+                    continue;
+                }
+                const windSpeed = wx.wind_speed ?? 0;
+                let windsockColor = "green";
+                if (windSpeed > 15) windsockColor = "red";
+                else if (windSpeed > 5) windsockColor = "yellow";
+                const rwyHeading = config.runway_heading;
+                // Determine overall safety for any aircraft? For now just show wind/vis
                 let anyUnsafe = false;
                 for (let ac of aircraftList) {
                     if (isAircraftSafe(ac, wx, rwyHeading) === false) { anyUnsafe = true; break; }
                 }
                 const overallClass = anyUnsafe ? "unsafe" : "safe";
                 html += `<div class="airfield ${overallClass}">
-                            <strong>${icao}</strong> | Wind: ${wx.wind_speed || "?"} kts ${wx.wind_dir ? wx.wind_dir+"°" : ""} | Vis: ${wx.visibility ?? "?"} mi
-                            ${wx.has_thunderstorm ? '<span class="badge met-warning">⛈️ TS</span>' : ""}
-                            <div style="font-size:12px;">Runway heading: ${rwyHeading || "not set"}°</div>
-                            <button onclick="selectAirfieldForAircraft('${icao}')">✈️ Show aircraft suitability</button>
+                            <div class="airfield-header">
+                                <span class="icao-code">${icao}</span>
+                                <div class="wind-indicator">
+                                    <span class="windsock ${windsockColor}">🧦</span>
+                                    <span>${windSpeed} kts</span>
+                                    ${wx.wind_dir ? `<span>${wx.wind_dir}°</span>` : ""}
+                                </div>
+                            </div>
+                            <div>Visibility: ${wx.visibility ?? "?"} mi</div>
+                            ${wx.has_thunderstorm ? '<div><span class="badge ts">⛈️ Thunderstorm</span></div>' : ""}
+                            <div class="small-text">Runway heading: ${rwyHeading}°</div>
+                            <div class="airfield-actions">
+                                <button onclick="selectAirfieldForAircraft('${icao}')">✈️ Check aircraft</button>
+                            </div>
                         </div>`;
             }
             container.innerHTML = html;
         }
 
         window.selectAirfieldForAircraft = function(icao) {
-            currentSelectedAirfield = icao;
             renderAircraftListWithSuitability(icao);
         };
 
-        // ---------- RENDER RIGHT PANEL (aircraft list with suitability) ----------
+        // ---------- RIGHT PANEL: Aircraft List with suitability ----------
         function renderAircraftList() {
-            // just list all aircraft with edit/delete buttons, no suitability yet
             const container = document.getElementById("aircraftList");
-            let html = `<div><em>Click on aircraft to edit/delete. Add new using form below.</em></div>`;
+            let html = `<div class="small-text">Click on aircraft to edit/delete</div>`;
             aircraftList.forEach((ac, idx) => {
-                html += `<div class="aircraft-item" style="background:#f3f4f6; margin:4px 0; padding:6px; border-radius:6px; display:flex; justify-content:space-between;">
+                html += `<div class="aircraft-item" style="justify-content:space-between;">
                             <span style="cursor:pointer;" onclick="editAircraft(${idx})">✏️ ${ac.name}</span>
-                            <button class="danger" onclick="deleteAircraft(${idx})" style="background:#dc2626; padding:2px 8px;">Delete</button>
+                            <button class="danger" onclick="deleteAircraft(${idx})">Delete</button>
                         </div>`;
             });
             container.innerHTML = html;
@@ -350,10 +371,11 @@
 
         function renderAircraftListWithSuitability(icao) {
             const wx = currentWeather.airfields[icao];
-            const rwyHeading = runwayData[icao]?.runway_heading;
+            const config = airfieldConfigs.find(c => c.icao === icao);
+            const rwyHeading = config ? config.runway_heading : null;
             const container = document.getElementById("aircraftList");
             if (!wx) {
-                container.innerHTML = `<div>No weather for ${icao}</div>`;
+                container.innerHTML = `<div>No weather for ${icao}</div><button onclick="renderAircraftList()">← Back</button>`;
                 return;
             }
             let html = `<h4>Suitability for ${icao}</h4>`;
@@ -361,7 +383,7 @@
                 const safe = isAircraftSafe(ac, wx, rwyHeading);
                 let statusClass = "aircraft-unsafe", statusText = "UNSAFE";
                 if (safe === true) { statusClass = "aircraft-safe"; statusText = "SAFE"; }
-                else if (safe === null) { statusClass = ""; statusText = "N/A (missing data)"; }
+                else if (safe === null) { statusClass = ""; statusText = "N/A (missing wind dir/runway)"; }
                 html += `<div class="aircraft-item ${statusClass}">
                             <strong>${ac.name}</strong>
                             <span>${statusText}</span>
@@ -380,50 +402,23 @@
             const newHead = parseFloat(prompt("Max headwind (kts)", ac.max_headwind));
             const newTail = parseFloat(prompt("Max tailwind (kts)", ac.max_tailwind));
             const newVis = parseFloat(prompt("Min visibility (miles)", ac.min_visibility));
-            const newThunder = confirm("Avoid thunderstorms? (OK = yes, Cancel = no)");
-            aircraftList[idx] = {
-                name: newName,
-                max_crosswind: newCross,
-                max_headwind: newHead,
-                max_tailwind: newTail,
-                min_visibility: newVis,
-                avoid_thunderstorm: newThunder
-            };
-            saveAircraftToLocalStorageAndExport();
+            const newThunder = confirm("Avoid thunderstorms? (OK = yes)");
+            aircraftList[idx] = { name: newName, max_crosswind: newCross, max_headwind: newHead, max_tailwind: newTail, min_visibility: newVis, avoid_thunderstorm: newThunder };
+            saveAircraft();
             renderAircraftList();
-            if (currentSelectedAirfield) renderAircraftListWithSuitability(currentSelectedAirfield);
-            else renderAirfields(); // refresh left panel
+            renderAirfields(); // refresh left panel alerts
         };
-
         window.deleteAircraft = function(idx) {
             if (confirm(`Delete ${aircraftList[idx].name}?`)) {
                 aircraftList.splice(idx, 1);
-                saveAircraftToLocalStorageAndExport();
+                saveAircraft();
                 renderAircraftList();
-                if (currentSelectedAirfield) renderAircraftListWithSuitability(currentSelectedAirfield);
-                else renderAirfields();
+                renderAirfields();
             }
         };
 
-        function saveAircraftToLocalStorageAndExport() {
-            // Save to localStorage for persistence (but not to GitHub file automatically)
-            localStorage.setItem("runwayviz_aircraft", JSON.stringify(aircraftList));
-            // You can also provide a download button for the JSON file
-        }
-
-        function loadAircraftFromLocalStorage() {
-            const stored = localStorage.getItem("runwayviz_aircraft");
-            if (stored) {
-                aircraftList = JSON.parse(stored);
-            } else {
-                // fallback to default from JSON
-                loadAircraftFromJSON();
-            }
-            renderAircraftList();
-        }
-
-        // Add new aircraft
-        document.getElementById("addBtn").addEventListener("click", () => {
+        // Add aircraft
+        document.getElementById("addAircraftBtn").addEventListener("click", () => {
             const name = document.getElementById("acName").value.trim();
             if (!name) return;
             const max_crosswind = parseFloat(document.getElementById("acCross").value);
@@ -432,62 +427,88 @@
             const min_visibility = parseFloat(document.getElementById("acVis").value);
             const avoid_thunderstorm = document.getElementById("acThunder").checked;
             if (isNaN(max_crosswind) || isNaN(max_headwind) || isNaN(max_tailwind) || isNaN(min_visibility)) {
-                alert("Please fill all numeric fields");
+                alert("Fill all numeric fields");
                 return;
             }
             aircraftList.push({ name, max_crosswind, max_headwind, max_tailwind, min_visibility, avoid_thunderstorm });
-            saveAircraftToLocalStorageAndExport();
+            saveAircraft();
             renderAircraftList();
+            // Clear
             document.getElementById("acName").value = "";
             document.getElementById("acCross").value = "";
             document.getElementById("acHead").value = "";
             document.getElementById("acTail").value = "";
             document.getElementById("acVis").value = "";
             document.getElementById("acThunder").checked = false;
-            if (currentSelectedAirfield) renderAircraftListWithSuitability(currentSelectedAirfield);
-            else renderAirfields();
+            renderAirfields();
         });
 
-        // Runway editing (simple)
-        function renderRunwayList() {
-            const container = document.getElementById("runwayList");
-            let html = "<ul>";
-            for (let [icao, data] of Object.entries(runwayData)) {
-                html += `<li>${icao}: ${data.runway_heading}° <button onclick="editRunway('${icao}')">Edit</button></li>`;
-            }
-            html += "</ul>";
+        // ---------- AIRFIELD EDITOR (right panel bottom) ----------
+        function renderAirfieldEditor() {
+            const container = document.getElementById("airfieldEditorList");
+            let html = "";
+            airfieldConfigs.forEach((cfg, idx) => {
+                html += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; background:#0f172a; padding:8px; border-radius:8px;">
+                            <span><strong>${cfg.icao}</strong> | Heading: ${cfg.runway_heading}°</span>
+                            <div>
+                                <button onclick="editAirfield(${idx})">Edit</button>
+                                <button class="danger" onclick="deleteAirfield(${idx})">Delete</button>
+                            </div>
+                        </div>`;
+            });
             container.innerHTML = html;
         }
-
-        window.editRunway = function(icao) {
-            const newHeading = prompt(`Enter runway heading for ${icao} (0-359)`, runwayData[icao]?.runway_heading);
-            if (newHeading !== null && !isNaN(parseFloat(newHeading))) {
-                runwayData[icao] = { runway_heading: parseFloat(newHeading) };
-                renderRunwayList();
-                renderAirfields(); // update left panel
-                if (currentSelectedAirfield) renderAircraftListWithSuitability(currentSelectedAirfield);
-                // Optionally save to localStorage and provide export
-                localStorage.setItem("runwayviz_runways", JSON.stringify(runwayData));
+        window.editAirfield = function(idx) {
+            const cfg = airfieldConfigs[idx];
+            const newIcao = prompt("ICAO code (4 letters)", cfg.icao)?.toUpperCase();
+            if (!newIcao) return;
+            const newHeading = parseFloat(prompt("Runway heading (0-359)", cfg.runway_heading));
+            if (isNaN(newHeading)) return;
+            airfieldConfigs[idx] = { icao: newIcao, runway_heading: newHeading };
+            saveAirfields();
+            renderAirfieldEditor();
+            renderAirfields(); // update left panel
+        };
+        window.deleteAirfield = function(idx) {
+            if (confirm(`Delete ${airfieldConfigs[idx].icao}?`)) {
+                airfieldConfigs.splice(idx, 1);
+                saveAirfields();
+                renderAirfieldEditor();
+                renderAirfields();
             }
         };
-
-        document.getElementById("editRunwaysBtn").addEventListener("click", () => {
-            alert("Click on individual airfield names in the right panel to edit runway headings.");
+        document.getElementById("addAirfieldBtn").addEventListener("click", () => {
+            const newIcao = prompt("Enter ICAO code (e.g., VGZR)")?.toUpperCase();
+            if (!newIcao) return;
+            const newHeading = parseFloat(prompt("Runway heading (0-359)", 0));
+            if (isNaN(newHeading)) return;
+            airfieldConfigs.push({ icao: newIcao, runway_heading: newHeading });
+            saveAirfields();
+            renderAirfieldEditor();
+            renderAirfields();
         });
 
-        // Initialize
-        async function init() {
-            await loadRunwayData();
-            // Try localStorage for aircraft first
-            const storedAircraft = localStorage.getItem("runwayviz_aircraft");
-            if (storedAircraft) {
-                aircraftList = JSON.parse(storedAircraft);
-                renderAircraftList();
-            } else {
-                await loadAircraftFromJSON();
+        // ---------- REFRESH WEATHER ----------
+        async function loadWeather() {
+            try {
+                const res = await fetch(WEATHER_RAW_URL + "?t=" + Date.now());
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                const text = await res.text();
+                currentWeather.airfields = parseWeatherFromReport(text);
+                renderAirfields();
+            } catch(e) {
+                document.getElementById("airfieldsList").innerHTML = `<div style="color:red">Weather fetch failed: ${e.message}</div>`;
             }
-            await loadWeatherAndRender();
-            setInterval(loadWeatherAndRender, 300000); // refresh every 5 min
+        }
+        document.getElementById("refreshWeatherBtn").addEventListener("click", loadWeather);
+
+        // ---------- INIT ----------
+        function init() {
+            loadData();
+            renderAirfieldEditor();
+            renderAircraftList();
+            loadWeather();
+            setInterval(loadWeather, 300000); // every 5 min
         }
         init();
     </script>

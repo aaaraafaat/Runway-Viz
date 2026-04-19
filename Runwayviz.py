@@ -11,7 +11,8 @@ if sys.platform == "win32":
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 # List of Bangladesh airfields (ICAO codes)
-AIRFIELDS = ['VGZR', 'VGEG', 'VGSY', 'VGJR']  # Dhaka, Chittagong, Sylhet, Jessore
+AIRFIELDS = ['VGZR', 'VGEG', 'VGSY', 'VGJR', 'VGBR', 'VGTJ']  # add any valid ICAO
+
 
 # Aircraft limits (Cessna 152 example)
 CROSSWIND_LIMIT_KNOTS = 12
