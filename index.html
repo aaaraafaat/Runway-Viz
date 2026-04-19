@@ -3,60 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Runway Viz – Pilot Dashboard</title>
+    <title>Runway Viz – Advanced Pilot Dashboard</title>
     <style>
-        * { box-sizing: border-box; transition: background 0.2s, color 0.2s, border-color 0.2s; }
+        * { box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            transition: 0.2s;
+            background: #0a0f1e;
+            color: #e2e8f0;
         }
-        body.dark { background: #0a0f1e; color: #e2e8f0; }
-        body.light { background: #f0f2f5; color: #1e293b; }
-        body.dark .card { background: #1e293b; border: 1px solid #334155; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
-        body.light .card { background: white; border: 1px solid #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        body.dark .airfield { background: #0f172a; }
-        body.light .airfield { background: #f9fafb; }
-        body.dark .aircraft-item { background: #0f172a; }
-        body.light .aircraft-item { background: #f1f5f9; }
-        body.dark .aircraft-safe { background: #14532d; color: #bbf7d0; }
-        body.light .aircraft-safe { background: #dcfce7; color: #166534; }
-        body.dark .aircraft-unsafe { background: #7f1d1d; color: #fecaca; }
-        body.light .aircraft-unsafe { background: #fee2e2; color: #991b1b; }
-        body.dark .runway-svg { background: #0f172a; }
-        body.light .runway-svg { background: #e2e8f0; }
-        body.dark input, body.dark select { background: #0f172a; border-color: #334155; color: #e2e8f0; }
-        body.light input, body.light select { background: white; border-color: #cbd5e1; color: #1e293b; }
-        .dashboard { display: flex; gap: 24px; flex-wrap: wrap; }
-        .left-panel { flex: 2; min-width: 320px; }
-        .right-panel { flex: 1.2; min-width: 280px; }
-        .card { border-radius: 20px; padding: 20px; margin-bottom: 24px; }
-        .card h3 { margin-top: 0; color: #facc15; border-left: 4px solid #facc15; padding-left: 12px; }
-        .airfield { border-left: 4px solid #475569; margin-bottom: 16px; padding: 16px; border-radius: 16px; }
+        .dashboard {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .left-panel { flex: 2; min-width: 360px; }
+        .right-panel { flex: 1.2; min-width: 300px; }
+        .card {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid #334155;
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #facc15;
+            border-left: 4px solid #facc15;
+            padding-left: 12px;
+        }
+        .airfield {
+            background: #0f172a;
+            border-left: 4px solid #475569;
+            margin-bottom: 16px;
+            padding: 16px;
+            border-radius: 16px;
+        }
         .airfield.unsafe { border-left-color: #ef4444; }
         .airfield.safe { border-left-color: #22c55e; }
-        .airfield-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-        .icao-code { font-weight: bold; font-size: 1.4rem; color: #facc15; }
-        .wind-indicator { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.2); padding: 4px 12px; border-radius: 40px; }
+        .airfield-header {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .icao-code {
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: #facc15;
+        }
+        .wind-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #0f172a;
+            padding: 4px 12px;
+            border-radius: 40px;
+        }
         .windsock { font-size: 1.2rem; }
         .windsock.green { color: #22c55e; }
         .windsock.yellow { color: #eab308; }
         .windsock.red { color: #ef4444; }
         .badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 20px; background: #334155; }
         .badge.ts { background: #b91c1c; color: white; }
-        button { background: #3b82f6; border: none; padding: 6px 12px; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; }
+        button {
+            background: #3b82f6;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
         button:hover { background: #2563eb; }
-        button.danger { background: #dc2626; }
-        button.danger:hover { background: #b91c1c; }
-        .add-form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-        .add-form input { flex: 1; min-width: 70px; padding: 8px; border-radius: 8px; }
-        hr { margin: 16px 0; }
-        .runway-svg { border-radius: 16px; padding: 12px; text-align: center; margin-bottom: 16px; }
-        .airfield-actions { margin-top: 10px; display: flex; gap: 8px; justify-content: flex-end; }
-        .small-text { font-size: 0.75rem; color: #94a3b8; }
-        .theme-toggle { position: fixed; top: 20px; right: 20px; background: #facc15; border: none; border-radius: 40px; padding: 8px 16px; font-weight: bold; cursor: pointer; z-index: 1000; }
-        body.light .theme-toggle { background: #1e293b; color: white; }
+        .aircraft-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .aircraft-card {
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 12px;
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #334155;
+        }
+        .aircraft-card.selected {
+            border: 2px solid #facc15;
+            background: #1e293b;
+        }
+        .aircraft-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .aircraft-limits {
+            font-size: 0.75rem;
+            margin-top: 8px;
+            color: #94a3b8;
+        }
+        .runway-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .runway-svg {
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 20px;
+        }
+        .add-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .add-form input { flex: 1; min-width: 70px; padding: 8px; border-radius: 8px; background: #0f172a; border: 1px solid #334155; color: white; }
+        .small-text { font-size: 0.75rem; color: #94a3b8; margin-top: 8px; }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #facc15;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000;
+            color: #1e293b;
+        }
     </style>
 </head>
 <body class="dark">
@@ -68,48 +149,37 @@
                 <h3>📡 Airfield Weather & Alerts</h3>
                 <div id="airfieldsList">Loading weather data...</div>
                 <div class="airfield-actions" style="margin-top: 16px;">
-                    <button id="addAirfieldBtn">➕ Add New Airfield</button>
+                    <button id="addAirfieldBtn">➕ Add Airfield</button>
                     <button id="refreshWeatherBtn">🔄 Refresh</button>
                 </div>
-                <div class="small-text" style="margin-top: 12px;">💡 Windsock color: 🟢 0-5 kts | 🟡 5-15 kts | 🔴 >15 kts</div>
             </div>
             <div class="card">
-                <h3>🛬 Runway Orientation (North up)</h3>
-                <div class="runway-svg">
-                    <svg width="200" height="200" viewBox="0 0 200 200">
-                        <circle cx="100" cy="100" r="90" stroke="#facc15" stroke-width="2" fill="none"/>
-                        <line x1="100" y1="10" x2="100" y2="190" stroke="#facc15" stroke-width="2" stroke-dasharray="5,5"/>
-                        <line x1="10" y1="100" x2="190" y2="100" stroke="#475569" stroke-width="1"/>
-                        <polygon points="100,10 90,30 110,30" fill="#facc15"/>
-                        <text x="100" y="35" fill="#facc15" font-size="12" text-anchor="middle">N</text>
-                        <text x="100" y="185" fill="#94a3b8" font-size="10" text-anchor="middle">S</text>
-                        <rect x="70" y="60" width="60" height="80" fill="#334155" rx="4"/>
-                        <text x="100" y="105" fill="white" font-size="10" text-anchor="middle">RWY</text>
-                    </svg>
-                    <div class="small-text">Runway heading relative to North</div>
-                </div>
+                <h3>🛬 Runway & Wind Direction</h3>
+                <div id="runwayVisual" class="runway-container"></div>
+                <div id="extraAirfieldInfo" class="small-text"></div>
             </div>
         </div>
         <div class="right-panel">
             <div class="card">
                 <h3>✈️ Aircraft Profiles</h3>
-                <div id="aircraftList">Loading aircraft...</div>
+                <div id="aircraftList" class="aircraft-grid"></div>
                 <hr>
                 <h4>➕ Add New Aircraft</h4>
-                <div class="add-form" id="addAircraftForm">
-                    <input type="text" id="acName" placeholder="Name" style="flex:2">
-                    <input type="number" id="acCross" placeholder="Xwind max" style="flex:1">
-                    <input type="number" id="acHead" placeholder="Headwind max" style="flex:1">
-                    <input type="number" id="acTail" placeholder="Tailwind max" style="flex:1">
-                    <input type="number" id="acVis" placeholder="Min vis (mi)" style="flex:1">
-                    <label style="display:flex; align-items:center;"><input type="checkbox" id="acThunder"> Avoid TS</label>
+                <div class="add-form">
+                    <input type="text" id="acName" placeholder="Name">
+                    <input type="number" id="acCross" placeholder="Xwind max">
+                    <input type="number" id="acHead" placeholder="Headwind max">
+                    <input type="number" id="acTail" placeholder="Tailwind max">
+                    <input type="number" id="acVis" placeholder="Min vis (mi)">
+                    <label><input type="checkbox" id="acThunder"> Avoid TS</label>
                     <button id="addAircraftBtn">Add</button>
                 </div>
+                <div class="small-text">Click on aircraft to edit/delete</div>
             </div>
             <div class="card">
-                <h3>🗺️ Airfields (ICAO & Runway Heading)</h3>
+                <h3>🗺️ Airfield Editor</h3>
                 <div id="airfieldEditorList"></div>
-                <div class="small-text">Click Edit to change runway heading. Delete removes from dashboard (weather fetch still needs Python update).</div>
+                <div class="small-text">Edit runway heading to see orientation change.</div>
             </div>
         </div>
     </div>
@@ -129,10 +199,12 @@
             setTheme(newTheme);
         });
 
-        // ---------- DATA STORAGE ----------
+        // Data stores
         let aircraftList = [];
         let airfieldConfigs = [];
         let currentWeather = { airfields: {} };
+        let selectedAircraftIndex = 0;
+        let selectedAirfieldIcao = null;
 
         const WEATHER_RAW_URL = "https://raw.githubusercontent.com/aaaraafaat/Runway-Viz/main/latest_report.txt";
         const DEFAULT_AIRCRAFT = [
@@ -140,7 +212,6 @@
             { name: "Cessna 172", max_crosswind: 15, max_headwind: 25, max_tailwind: 12, min_visibility: 3, avoid_thunderstorm: true },
             { name: "Piper Seneca", max_crosswind: 20, max_headwind: 30, max_tailwind: 15, min_visibility: 2, avoid_thunderstorm: false }
         ];
-        // Only VGHS and VGEG by default
         const DEFAULT_AIRFIELDS = [
             { icao: "VGHS", runway_heading: 140 },
             { icao: "VGEG", runway_heading: 160 }
@@ -150,29 +221,31 @@
             const storedAircraft = localStorage.getItem("runwayviz_aircraft");
             aircraftList = storedAircraft ? JSON.parse(storedAircraft) : [...DEFAULT_AIRCRAFT];
             const storedAirfields = localStorage.getItem("runwayviz_airfields");
-            if (storedAirfields) {
-                airfieldConfigs = JSON.parse(storedAirfields);
-                // Optionally, if stored contains VGSY/VGJR, we could filter, but let user manage.
-            } else {
-                airfieldConfigs = [...DEFAULT_AIRFIELDS];
-            }
+            airfieldConfigs = storedAirfields ? JSON.parse(storedAirfields) : [...DEFAULT_AIRFIELDS];
         }
         function saveAircraft() { localStorage.setItem("runwayviz_aircraft", JSON.stringify(aircraftList)); }
         function saveAirfields() { localStorage.setItem("runwayviz_airfields", JSON.stringify(airfieldConfigs)); }
 
+        // Weather parsing (extended for temp, QNH)
         function parseWeatherFromReport(text) {
             const lines = text.split(/\r?\n/);
             let airfields = {};
             let currentICAO = null;
             let currentWind = null, currentVis = null, currentRaw = "", hasTS = false;
+            let currentTemp = null, currentQnh = null;
             for (let line of lines) {
                 const match = line.match(/^([A-Z]{4}):/);
                 if (match) {
                     if (currentICAO) {
-                        airfields[currentICAO] = { wind_speed: currentWind?.speed, wind_dir: currentWind?.dir, visibility: currentVis, metar_raw: currentRaw, has_thunderstorm: hasTS };
+                        airfields[currentICAO] = { 
+                            wind_speed: currentWind?.speed, wind_dir: currentWind?.dir, 
+                            visibility: currentVis, metar_raw: currentRaw, has_thunderstorm: hasTS,
+                            temperature: currentTemp, qnh: currentQnh
+                        };
                     }
                     currentICAO = match[1];
                     currentWind = null; currentVis = null; currentRaw = ""; hasTS = false;
+                    currentTemp = null; currentQnh = null;
                 } else if (currentICAO) {
                     if (line.includes("Wind:")) {
                         const spdMatch = line.match(/Wind:\s*(\d+(?:\.\d+)?)\s*kts/);
@@ -191,11 +264,29 @@
                             currentWind.speed = parseInt(metarWind[2]);
                         }
                         if (currentRaw.includes("TS") || currentRaw.includes("TSRA")) hasTS = true;
+                        // Temp from raw: e.g., "28/25"
+                        const tempMatch = currentRaw.match(/(\d{2})\/(\d{2})/);
+                        if (tempMatch) currentTemp = parseInt(tempMatch[1]);
+                        // QNH
+                        const qnhMatch = currentRaw.match(/Q(\d{4})/);
+                        if (qnhMatch) currentQnh = parseInt(qnhMatch[1]);
+                    }
+                    if (line.includes("Temp:")) {
+                        const tempMatch = line.match(/Temp:\s*(\d+)°C/);
+                        if (tempMatch) currentTemp = parseInt(tempMatch[1]);
+                    }
+                    if (line.includes("QNH:")) {
+                        const qnhMatch = line.match(/QNH:\s*(\d+)\s*hPa/);
+                        if (qnhMatch) currentQnh = parseInt(qnhMatch[1]);
                     }
                 }
             }
             if (currentICAO) {
-                airfields[currentICAO] = { wind_speed: currentWind?.speed, wind_dir: currentWind?.dir, visibility: currentVis, metar_raw: currentRaw, has_thunderstorm: hasTS };
+                airfields[currentICAO] = { 
+                    wind_speed: currentWind?.speed, wind_dir: currentWind?.dir, 
+                    visibility: currentVis, metar_raw: currentRaw, has_thunderstorm: hasTS,
+                    temperature: currentTemp, qnh: currentQnh
+                };
             }
             return airfields;
         }
@@ -223,6 +314,7 @@
             return true;
         }
 
+        // Render left panel airfields
         function renderAirfields() {
             const container = document.getElementById("airfieldsList");
             if (!currentWeather.airfields || Object.keys(currentWeather.airfields).length === 0) {
@@ -234,7 +326,7 @@
                 const icao = config.icao;
                 const wx = currentWeather.airfields[icao];
                 if (!wx) {
-                    html += `<div class="airfield"><div class="airfield-header"><span class="icao-code">${icao}</span><span class="badge">No data (ICAO not in report)</span></div><div class="small-text">Check Python script AIRFIELDS list.</div></div>`;
+                    html += `<div class="airfield"><div class="airfield-header"><span class="icao-code">${icao}</span><span class="badge">No data</span></div></div>`;
                     continue;
                 }
                 const windSpeed = wx.wind_speed ?? 0;
@@ -247,7 +339,7 @@
                     if (isAircraftSafe(ac, wx, rwyHeading) === false) { anyUnsafe = true; break; }
                 }
                 const overallClass = anyUnsafe ? "unsafe" : "safe";
-                html += `<div class="airfield ${overallClass}">
+                html += `<div class="airfield ${overallClass}" onclick="selectAirfield('${icao}')" style="cursor:pointer;">
                             <div class="airfield-header">
                                 <span class="icao-code">${icao}</span>
                                 <div class="wind-indicator">
@@ -258,55 +350,127 @@
                             </div>
                             <div>Visibility: ${wx.visibility ?? "?"} mi</div>
                             ${wx.has_thunderstorm ? '<div><span class="badge ts">⛈️ Thunderstorm</span></div>' : ""}
+                            <div class="small-text">Temp: ${wx.temperature ?? "?"}°C | QNH: ${wx.qnh ?? "?"} hPa</div>
                             <div class="small-text">Runway heading: ${rwyHeading}°</div>
-                            <div class="airfield-actions">
-                                <button onclick="selectAirfieldForAircraft('${icao}')">✈️ Check aircraft</button>
-                            </div>
                         </div>`;
             }
             container.innerHTML = html;
         }
 
-        window.selectAirfieldForAircraft = function(icao) {
-            renderAircraftListWithSuitability(icao);
+        window.selectAirfield = function(icao) {
+            selectedAirfieldIcao = icao;
+            renderRunwayVisual();
+            renderAircraftSuitability();
         };
 
+        // Render runway SVG with rotation and wind arrow
+        function renderRunwayVisual() {
+            const container = document.getElementById("runwayVisual");
+            const infoDiv = document.getElementById("extraAirfieldInfo");
+            if (!selectedAirfieldIcao) {
+                container.innerHTML = "<div class='small-text'>Select an airfield to see runway</div>";
+                infoDiv.innerHTML = "";
+                return;
+            }
+            const config = airfieldConfigs.find(c => c.icao === selectedAirfieldIcao);
+            if (!config) return;
+            const heading = config.runway_heading;
+            const wx = currentWeather.airfields[selectedAirfieldIcao];
+            const windDir = wx?.wind_dir;
+            const windSpeed = wx?.wind_speed;
+            // Rotate runway by heading (North up, rotate clockwise)
+            const runwayRotation = heading;
+            // Wind arrow: direction FROM which wind blows, so arrow points opposite (towards where wind is going)
+            // We'll draw a separate arrow rotated by windDir
+            const svgSize = 200;
+            const center = svgSize/2;
+            const runwayLength = 120;
+            const runwayWidth = 30;
+            // Calculate runway end points before rotation
+            const rad = runwayRotation * Math.PI/180;
+            const x1 = center - (runwayLength/2) * Math.cos(rad);
+            const y1 = center - (runwayLength/2) * Math.sin(rad);
+            const x2 = center + (runwayLength/2) * Math.cos(rad);
+            const y2 = center + (runwayLength/2) * Math.sin(rad);
+            // Threshold markings: two small rectangles at each end
+            const thresholdLength = 10;
+            const thresholdWidth = 20;
+            const t1x = x1 - thresholdLength * Math.cos(rad);
+            const t1y = y1 - thresholdLength * Math.sin(rad);
+            const t2x = x2 + thresholdLength * Math.cos(rad);
+            const t2y = y2 + thresholdLength * Math.sin(rad);
+            
+            let windArrow = "";
+            if (windDir !== undefined && windDir !== null) {
+                const arrowRad = (windDir) * Math.PI/180; // wind FROM direction
+                const arrowLength = 70;
+                const arrowEndX = center + arrowLength * Math.cos(arrowRad);
+                const arrowEndY = center + arrowLength * Math.sin(arrowRad);
+                windArrow = `<line x1="${center}" y1="${center}" x2="${arrowEndX}" y2="${arrowEndY}" stroke="#facc15" stroke-width="3" marker-end="url(#arrow)"/>`;
+            }
+            
+            const svg = `<svg width="${svgSize}" height="${svgSize}" viewBox="0 0 ${svgSize} ${svgSize}" class="runway-svg">
+                            <defs>
+                                <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                                    <path d="M0,0 L10,5 L0,10 Z" fill="#facc15"/>
+                                </marker>
+                            </defs>
+                            <circle cx="${center}" cy="${center}" r="90" stroke="#475569" stroke-width="1" fill="none"/>
+                            <line x1="${center}" y1="10" x2="${center}" y2="${svgSize-10}" stroke="#334155" stroke-width="1" stroke-dasharray="4,4"/>
+                            <text x="${center}" y="25" fill="#facc15" font-size="12" text-anchor="middle">N</text>
+                            <!-- Runway -->
+                            <rect x="${center-runwayWidth/2}" y="${center-runwayLength/2}" width="${runwayWidth}" height="${runwayLength}" fill="#334155" transform="rotate(${runwayRotation} ${center} ${center})" rx="4"/>
+                            <!-- Threshold markings -->
+                            <rect x="${center-thresholdWidth/2}" y="${center-runwayLength/2 - thresholdLength}" width="${thresholdWidth}" height="${thresholdLength}" fill="#facc15" transform="rotate(${runwayRotation} ${center} ${center})"/>
+                            <rect x="${center-thresholdWidth/2}" y="${center+runwayLength/2}" width="${thresholdWidth}" height="${thresholdLength}" fill="#facc15" transform="rotate(${runwayRotation} ${center} ${center})"/>
+                            <!-- Wind arrow -->
+                            ${windArrow}
+                        </svg>`;
+            container.innerHTML = svg;
+            infoDiv.innerHTML = `Runway ${config.icao} heading: ${heading}° | Wind: ${windSpeed ?? "?"} kts from ${windDir ?? "?"}°`;
+        }
+
+        // Render aircraft as button-like cards with limits
         function renderAircraftList() {
             const container = document.getElementById("aircraftList");
-            let html = `<div class="small-text">Click on aircraft to edit/delete</div>`;
+            let html = "";
             aircraftList.forEach((ac, idx) => {
-                html += `<div class="aircraft-item" style="justify-content:space-between;">
-                            <span style="cursor:pointer;" onclick="editAircraft(${idx})">✏️ ${ac.name}</span>
-                            <button class="danger" onclick="deleteAircraft(${idx})">Delete</button>
+                const selectedClass = (idx === selectedAircraftIndex) ? "selected" : "";
+                html += `<div class="aircraft-card ${selectedClass}" onclick="selectAircraft(${idx})">
+                            <div class="aircraft-name">${ac.name}</div>
+                            <div class="aircraft-limits">
+                                XW:${ac.max_crosswind} | HW:${ac.max_headwind}<br>
+                                TW:${ac.max_tailwind} | VIS:${ac.min_visibility}mi
+                                ${ac.avoid_thunderstorm ? "⛈️" : ""}
+                            </div>
+                            <div class="small-text">Click to edit</div>
                         </div>`;
             });
             container.innerHTML = html;
         }
 
-        function renderAircraftListWithSuitability(icao) {
-            const wx = currentWeather.airfields[icao];
-            const config = airfieldConfigs.find(c => c.icao === icao);
-            const rwyHeading = config ? config.runway_heading : null;
-            const container = document.getElementById("aircraftList");
-            if (!wx) {
-                container.innerHTML = `<div>No weather for ${icao}</div><button onclick="renderAircraftList()">← Back</button>`;
-                return;
+        window.selectAircraft = function(idx) {
+            selectedAircraftIndex = idx;
+            renderAircraftList();
+            renderAircraftSuitability();
+        };
+
+        function renderAircraftSuitability() {
+            if (!selectedAirfieldIcao) return;
+            const wx = currentWeather.airfields[selectedAirfieldIcao];
+            const config = airfieldConfigs.find(c => c.icao === selectedAirfieldIcao);
+            if (!wx || !config) return;
+            const ac = aircraftList[selectedAircraftIndex];
+            if (!ac) return;
+            const safe = isAircraftSafe(ac, wx, config.runway_heading);
+            const suitabilityDiv = document.getElementById("extraAirfieldInfo");
+            if (suitableDiv) {
+                const safeText = safe ? "✅ SAFE" : (safe === false ? "❌ UNSAFE" : "⚠️ Unknown");
+                suitabilityDiv.innerHTML += `<div class="small-text" style="margin-top:8px;"><strong>${ac.name}</strong>: ${safeText}</div>`;
             }
-            let html = `<h4>Suitability for ${icao}</h4>`;
-            aircraftList.forEach(ac => {
-                const safe = isAircraftSafe(ac, wx, rwyHeading);
-                let statusClass = "aircraft-unsafe", statusText = "UNSAFE";
-                if (safe === true) { statusClass = "aircraft-safe"; statusText = "SAFE"; }
-                else if (safe === null) { statusClass = ""; statusText = "N/A (missing wind dir/runway)"; }
-                html += `<div class="aircraft-item ${statusClass}">
-                            <strong>${ac.name}</strong>
-                            <span>${statusText}</span>
-                         </div>`;
-            });
-            html += `<button onclick="renderAircraftList()">← Back to aircraft list</button>`;
-            container.innerHTML = html;
         }
 
+        // Aircraft edit/delete
         window.editAircraft = function(idx) {
             const ac = aircraftList[idx];
             const newName = prompt("Aircraft name", ac.name);
@@ -320,13 +484,16 @@
             saveAircraft();
             renderAircraftList();
             renderAirfields();
+            if (selectedAirfieldIcao) renderAircraftSuitability();
         };
         window.deleteAircraft = function(idx) {
             if (confirm(`Delete ${aircraftList[idx].name}?`)) {
                 aircraftList.splice(idx, 1);
+                if (selectedAircraftIndex >= aircraftList.length) selectedAircraftIndex = 0;
                 saveAircraft();
                 renderAircraftList();
                 renderAirfields();
+                if (selectedAirfieldIcao) renderAircraftSuitability();
             }
         };
 
@@ -354,11 +521,12 @@
             renderAirfields();
         });
 
+        // Airfield editor (runway headings)
         function renderAirfieldEditor() {
             const container = document.getElementById("airfieldEditorList");
             let html = "";
             airfieldConfigs.forEach((cfg, idx) => {
-                html += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; background:rgba(0,0,0,0.2); padding:8px; border-radius:8px;">
+                html += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; background:#0f172a; padding:8px; border-radius:8px;">
                             <span><strong>${cfg.icao}</strong> | Heading: ${cfg.runway_heading}°</span>
                             <div>
                                 <button onclick="editAirfield(${idx})">Edit</button>
@@ -378,6 +546,10 @@
             saveAirfields();
             renderAirfieldEditor();
             renderAirfields();
+            if (selectedAirfieldIcao === cfg.icao) {
+                selectedAirfieldIcao = newIcao;
+                renderRunwayVisual();
+            }
         };
         window.deleteAirfield = function(idx) {
             if (confirm(`Delete ${airfieldConfigs[idx].icao}?`)) {
@@ -385,6 +557,8 @@
                 saveAirfields();
                 renderAirfieldEditor();
                 renderAirfields();
+                if (selectedAirfieldIcao === airfieldConfigs[idx]?.icao) selectedAirfieldIcao = null;
+                renderRunwayVisual();
             }
         };
         document.getElementById("addAirfieldBtn").addEventListener("click", () => {
@@ -405,6 +579,10 @@
                 const text = await res.text();
                 currentWeather.airfields = parseWeatherFromReport(text);
                 renderAirfields();
+                if (selectedAirfieldIcao) {
+                    renderRunwayVisual();
+                    renderAircraftSuitability();
+                }
             } catch(e) {
                 document.getElementById("airfieldsList").innerHTML = `<div style="color:red">Weather fetch failed: ${e.message}</div>`;
             }

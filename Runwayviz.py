@@ -44,7 +44,10 @@ def generate_report():
             lines.append("   ⛈️ Thunderstorm reported")
         if weather.get('raw_metar'):
             lines.append(f"   Raw: {weather['raw_metar'][:100]}...")
-    
+        if weather.get('temperature') is not None:
+            lines.append(f"   Temp: {weather['temperature']}°C / Dew: {weather.get('dewpoint', '?')}°C")
+        if weather.get('qnh_hpa'):
+            lines.append(f"   QNH: {weather['qnh_hpa']} hPa")
     return "\n".join(lines)
 
 if __name__ == "__main__":
