@@ -5,38 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Runway Viz – Pilot Dashboard</title>
     <style>
-        * {
-            box-sizing: border-box;
-            transition: background 0.3s, color 0.2s;
-        }
+        * { box-sizing: border-box; transition: background 0.2s, color 0.2s, border-color 0.2s; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
+            transition: 0.2s;
+        }
+        /* Dark theme (default) */
+        body.dark {
             background: #0a0f1e;
             color: #e2e8f0;
         }
-        /* Dark mode is default – you can add a light mode toggle later */
+        body.light {
+            background: #f0f2f5;
+            color: #1e293b;
+        }
+        /* Theme-specific card styles */
+        body.dark .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        body.light .card {
+            background: white;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        body.dark .airfield { background: #0f172a; }
+        body.light .airfield { background: #f9fafb; }
+        body.dark .aircraft-item { background: #0f172a; }
+        body.light .aircraft-item { background: #f1f5f9; }
+        body.dark .aircraft-safe { background: #14532d; color: #bbf7d0; }
+        body.light .aircraft-safe { background: #dcfce7; color: #166534; }
+        body.dark .aircraft-unsafe { background: #7f1d1d; color: #fecaca; }
+        body.light .aircraft-unsafe { background: #fee2e2; color: #991b1b; }
+        body.dark .runway-svg { background: #0f172a; }
+        body.light .runway-svg { background: #e2e8f0; }
+        body.dark input, body.dark select { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+        body.light input, body.light select { background: white; border-color: #cbd5e1; color: #1e293b; }
+        /* Shared styles */
         .dashboard {
             display: flex;
             gap: 24px;
             flex-wrap: wrap;
         }
-        .left-panel {
-            flex: 2;
-            min-width: 320px;
-        }
-        .right-panel {
-            flex: 1.2;
-            min-width: 280px;
-        }
+        .left-panel { flex: 2; min-width: 320px; }
+        .right-panel { flex: 1.2; min-width: 280px; }
         .card {
-            background: #1e293b;
             border-radius: 20px;
             padding: 20px;
             margin-bottom: 24px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            border: 1px solid #334155;
         }
         .card h3 {
             margin-top: 0;
@@ -45,20 +64,13 @@
             padding-left: 12px;
         }
         .airfield {
-            background: #0f172a;
             border-left: 4px solid #475569;
             margin-bottom: 16px;
             padding: 16px;
             border-radius: 16px;
-            transition: 0.2s;
         }
-        .airfield.unsafe {
-            border-left-color: #ef4444;
-            background: #1e1a2a;
-        }
-        .airfield.safe {
-            border-left-color: #22c55e;
-        }
+        .airfield.unsafe { border-left-color: #ef4444; }
+        .airfield.safe { border-left-color: #22c55e; }
         .airfield-header {
             display: flex;
             justify-content: space-between;
@@ -75,13 +87,11 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: #0f172a;
+            background: rgba(0,0,0,0.2);
             padding: 4px 12px;
             border-radius: 40px;
         }
-        .windsock {
-            font-size: 1.2rem;
-        }
+        .windsock { font-size: 1.2rem; }
         .windsock.green { color: #22c55e; }
         .windsock.yellow { color: #eab308; }
         .windsock.red { color: #ef4444; }
@@ -100,40 +110,19 @@
             color: white;
             cursor: pointer;
             font-weight: bold;
-            transition: 0.2s;
         }
         button:hover { background: #2563eb; }
         button.danger { background: #dc2626; }
         button.danger:hover { background: #b91c1c; }
-        button.secondary { background: #475569; }
-        input, select {
-            background: #0f172a;
-            border: 1px solid #334155;
-            padding: 8px;
-            border-radius: 8px;
-            color: #e2e8f0;
-        }
-        .aircraft-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #0f172a;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 12px;
-        }
-        .aircraft-safe { background: #14532d; color: #bbf7d0; }
-        .aircraft-unsafe { background: #7f1d1d; color: #fecaca; }
         .add-form {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             margin-top: 12px;
         }
-        .add-form input { flex: 1; min-width: 70px; }
-        hr { border-color: #334155; margin: 16px 0; }
+        .add-form input { flex: 1; min-width: 70px; padding: 8px; border-radius: 8px; }
+        hr { margin: 16px 0; }
         .runway-svg {
-            background: #0f172a;
             border-radius: 16px;
             padding: 12px;
             text-align: center;
@@ -146,9 +135,23 @@
             justify-content: flex-end;
         }
         .small-text { font-size: 0.75rem; color: #94a3b8; }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #facc15;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        body.light .theme-toggle { background: #1e293b; color: white; }
     </style>
 </head>
-<body>
+<body class="dark">
+    <button class="theme-toggle" id="themeToggle">🌞 Light mode</button>
     <h1>🛩️ Runway Viz – Advanced Pilot Dashboard</h1>
     <div class="dashboard">
         <!-- LEFT PANEL: Airfields -->
@@ -206,12 +209,26 @@
     </div>
 
     <script>
-        // ---------- DATA STORAGE ----------
-        let aircraftList = [];      // each: { name, max_crosswind, max_headwind, max_tailwind, min_visibility, avoid_thunderstorm }
-        let airfieldConfigs = [];   // each: { icao, runway_heading }
-        let currentWeather = { airfields: {} }; // from latest_report.txt
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        function setTheme(theme) {
+            document.body.classList.remove('dark', 'light');
+            document.body.classList.add(theme);
+            localStorage.setItem('runwayviz_theme', theme);
+            themeToggle.textContent = theme === 'dark' ? '🌞 Light mode' : '🌙 Dark mode';
+        }
+        const savedTheme = localStorage.getItem('runwayviz_theme') || 'dark';
+        setTheme(savedTheme);
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.body.classList.contains('dark') ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
 
-        // URLs
+        // ---------- DATA STORAGE ----------
+        let aircraftList = [];
+        let airfieldConfigs = [];
+        let currentWeather = { airfields: {} };
+
         const WEATHER_RAW_URL = "https://raw.githubusercontent.com/aaaraafaat/Runway-Viz/main/latest_report.txt";
         const DEFAULT_AIRCRAFT = [
             { name: "Cessna 152", max_crosswind: 12, max_headwind: 20, max_tailwind: 10, min_visibility: 3, avoid_thunderstorm: true },
@@ -225,24 +242,16 @@
             { icao: "VGJR", runway_heading: 120 }
         ];
 
-        // ---------- LOAD/SAVE LOCALSTORAGE ----------
         function loadData() {
             const storedAircraft = localStorage.getItem("runwayviz_aircraft");
-            if (storedAircraft) aircraftList = JSON.parse(storedAircraft);
-            else aircraftList = [...DEFAULT_AIRCRAFT];
-
+            aircraftList = storedAircraft ? JSON.parse(storedAircraft) : [...DEFAULT_AIRCRAFT];
             const storedAirfields = localStorage.getItem("runwayviz_airfields");
-            if (storedAirfields) airfieldConfigs = JSON.parse(storedAirfields);
-            else airfieldConfigs = [...DEFAULT_AIRFIELDS];
+            airfieldConfigs = storedAirfields ? JSON.parse(storedAirfields) : [...DEFAULT_AIRFIELDS];
         }
-        function saveAircraft() {
-            localStorage.setItem("runwayviz_aircraft", JSON.stringify(aircraftList));
-        }
-        function saveAirfields() {
-            localStorage.setItem("runwayviz_airfields", JSON.stringify(airfieldConfigs));
-        }
+        function saveAircraft() { localStorage.setItem("runwayviz_aircraft", JSON.stringify(aircraftList)); }
+        function saveAirfields() { localStorage.setItem("runwayviz_airfields", JSON.stringify(airfieldConfigs)); }
 
-        // ---------- WEATHER PARSING (same as before, extracts wind, vis, TS) ----------
+        // Weather parsing (same as before)
         function parseWeatherFromReport(text) {
             const lines = text.split(/\r?\n/);
             let airfields = {};
@@ -282,7 +291,6 @@
             return airfields;
         }
 
-        // ---------- WIND COMPONENTS ----------
         function computeWindComponents(windDir, windSpeed, runwayHeading) {
             if (!windDir || !runwayHeading) return { headwind: null, crosswind: null, tailwind: null };
             let angleDiff = Math.abs(windDir - runwayHeading);
@@ -306,7 +314,6 @@
             return true;
         }
 
-        // ---------- RENDER LEFT PANEL (Airfields with windsock) ----------
         function renderAirfields() {
             const container = document.getElementById("airfieldsList");
             if (!currentWeather.airfields || Object.keys(currentWeather.airfields).length === 0) {
@@ -326,7 +333,6 @@
                 if (windSpeed > 15) windsockColor = "red";
                 else if (windSpeed > 5) windsockColor = "yellow";
                 const rwyHeading = config.runway_heading;
-                // Determine overall safety for any aircraft? For now just show wind/vis
                 let anyUnsafe = false;
                 for (let ac of aircraftList) {
                     if (isAircraftSafe(ac, wx, rwyHeading) === false) { anyUnsafe = true; break; }
@@ -356,7 +362,6 @@
             renderAircraftListWithSuitability(icao);
         };
 
-        // ---------- RIGHT PANEL: Aircraft List with suitability ----------
         function renderAircraftList() {
             const container = document.getElementById("aircraftList");
             let html = `<div class="small-text">Click on aircraft to edit/delete</div>`;
@@ -393,7 +398,6 @@
             container.innerHTML = html;
         }
 
-        // Edit/Delete aircraft
         window.editAircraft = function(idx) {
             const ac = aircraftList[idx];
             const newName = prompt("Aircraft name", ac.name);
@@ -406,7 +410,7 @@
             aircraftList[idx] = { name: newName, max_crosswind: newCross, max_headwind: newHead, max_tailwind: newTail, min_visibility: newVis, avoid_thunderstorm: newThunder };
             saveAircraft();
             renderAircraftList();
-            renderAirfields(); // refresh left panel alerts
+            renderAirfields();
         };
         window.deleteAircraft = function(idx) {
             if (confirm(`Delete ${aircraftList[idx].name}?`)) {
@@ -417,7 +421,6 @@
             }
         };
 
-        // Add aircraft
         document.getElementById("addAircraftBtn").addEventListener("click", () => {
             const name = document.getElementById("acName").value.trim();
             if (!name) return;
@@ -433,7 +436,6 @@
             aircraftList.push({ name, max_crosswind, max_headwind, max_tailwind, min_visibility, avoid_thunderstorm });
             saveAircraft();
             renderAircraftList();
-            // Clear
             document.getElementById("acName").value = "";
             document.getElementById("acCross").value = "";
             document.getElementById("acHead").value = "";
@@ -443,12 +445,11 @@
             renderAirfields();
         });
 
-        // ---------- AIRFIELD EDITOR (right panel bottom) ----------
         function renderAirfieldEditor() {
             const container = document.getElementById("airfieldEditorList");
             let html = "";
             airfieldConfigs.forEach((cfg, idx) => {
-                html += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; background:#0f172a; padding:8px; border-radius:8px;">
+                html += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; background:rgba(0,0,0,0.2); padding:8px; border-radius:8px;">
                             <span><strong>${cfg.icao}</strong> | Heading: ${cfg.runway_heading}°</span>
                             <div>
                                 <button onclick="editAirfield(${idx})">Edit</button>
@@ -467,7 +468,7 @@
             airfieldConfigs[idx] = { icao: newIcao, runway_heading: newHeading };
             saveAirfields();
             renderAirfieldEditor();
-            renderAirfields(); // update left panel
+            renderAirfields();
         };
         window.deleteAirfield = function(idx) {
             if (confirm(`Delete ${airfieldConfigs[idx].icao}?`)) {
@@ -488,7 +489,6 @@
             renderAirfields();
         });
 
-        // ---------- REFRESH WEATHER ----------
         async function loadWeather() {
             try {
                 const res = await fetch(WEATHER_RAW_URL + "?t=" + Date.now());
@@ -502,13 +502,12 @@
         }
         document.getElementById("refreshWeatherBtn").addEventListener("click", loadWeather);
 
-        // ---------- INIT ----------
         function init() {
             loadData();
             renderAirfieldEditor();
             renderAircraftList();
             loadWeather();
-            setInterval(loadWeather, 300000); // every 5 min
+            setInterval(loadWeather, 300000);
         }
         init();
     </script>
