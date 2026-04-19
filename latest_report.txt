@@ -1,5 +1,5 @@
 === Runway Viz Report ===
-Generated: 2026-04-19 13:26 UTC
+Generated: 2026-04-19 14:01 UTC
 
 VGZR: FETCH FAILED - check network or API
 
@@ -11,3 +11,7 @@ LOW VISIBILITY: 3.1 miles (limit 5)
 VGSY: FETCH FAILED - check network or API
 
 VGJR: FETCH FAILED - check network or API
+
+VGBR: FETCH FAILED - check network or API
+
+VGTJ: FETCH FAILED - check network or API
