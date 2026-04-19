@@ -1,0 +1,7 @@
+{
+    "VGZR": { "name": "Dhaka", "runway_heading": 140, "enabled": true },
+    "VGEG": { "name": "Chittagong", "runway_heading": 160, "enabled": true },
+    "VGSY": { "name": "Sylhet", "runway_heading": 130, "enabled": true },
+    "VGJR": { "name": "Jessore", "runway_heading": 120, "enabled": true },
+    "VGBR": { "name": "Barisal", "runway_heading": 170, "enabled": false }
+  }
