@@ -1,16 +1,16 @@
 === Runway Viz Report ===
-Generated: 2026-10-17 03:59 UTC
+Generated: 2026-10-17 08:29 UTC
 
-VGHS: ALERT [Source: NOAA, Time: 2026-10-17T03:59:38.394398]
-LOW VISIBILITY: 2.2 miles (limit 5)
-   Wind: 4 kts 80° | Vis: 2.2 mi
-   Temp: 30°C | Dew: 21°C
-   QNH: 1014 hPa
-   Raw: METAR VGHS 170330Z 08004KT 3500 HZ NSC 30/21 Q1014 NOSIG...
-
-VGEG: ALERT [Source: NOAA, Time: 2026-10-17T03:59:38.523454]
+VGHS: ALERT [Source: NOAA, Time: 2026-10-17T08:29:40.205166]
 LOW VISIBILITY: 2.5 miles (limit 5)
-   Wind: 4 kts 270° | Vis: 2.5 mi
-   Temp: 31°C | Dew: 26°C
-   QNH: 1013 hPa
-   Raw: METAR VGEG 170300Z 27004KT 4000 HZ SCT018 31/26 Q1013 NOSIG...
+   Wind: 6 kts 310° | Vis: 2.5 mi
+   Temp: 33°C | Dew: 20°C
+   QNH: 1011 hPa
+   Raw: METAR VGHS 170800Z 31006KT 4000 HZ NSC 33/20 Q1011 NOSIG...
+
+VGEG: ALERT [Source: NOAA, Time: 2026-10-17T08:29:43.186037]
+LOW VISIBILITY: 3.1 miles (limit 5)
+   Wind: 12 kts 310° | Vis: 3.1 mi
+   Temp: 34°C | Dew: 22°C
+   QNH: 1010 hPa
+   Raw: METAR VGEG 170800Z 31012KT 5000 HZ SCT018 34/22 Q1010 NOSIG...
